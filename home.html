@@ -8,6 +8,59 @@
     <title>Technitude Tours & Travels</title>
 
     <style>
+        
+/* ================= ABOUT US ================= */
+.about-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.about-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: 0.3s;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.about-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #e3f7f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.about-card h3 {
+    color: #18333f;
+    margin-bottom: 12px;
+}
+
+.about-card p {
+    color: #687980;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .about-content {
+        grid-template-columns: 1fr;
+    }
+}
+
 
         * {
             margin: 0;
@@ -41,7 +94,6 @@
             color: inherit;
             text-decoration: none;
         }
-
 
         /* ================= NAVBAR ================= */
 
@@ -134,7 +186,6 @@
             background: var(--primary-dark) !important;
         }
 
-
         /* ================= HERO ================= */
 
         .hero {
@@ -226,18 +277,19 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.18);
         }
 
-
         /* ================= SEARCH ================= */
 
         .search-box {
             width: min(94%, 1180px);
-            margin: -55px auto 60px;
+            margin: -55px auto 35px;
             position: relative;
             z-index: 50;
+
             background: white;
             border-radius: 22px;
             padding: 25px;
-            box-shadow: 0 10px 35px rgba(0,50,70,0.18);
+
+            box-shadow: 0 10px 35px rgba(0, 50, 70, 0.18);
 
             display: grid;
 
@@ -250,6 +302,14 @@
 
             gap: 10px;
             align-items: end;
+        }
+
+        #fromToSection {
+            display: contents;
+        }
+
+        .search-item {
+            min-width: 0;
         }
 
         .search-item label {
@@ -293,6 +353,8 @@
             box-shadow: 0 0 0 3px rgba(8,126,139,0.10);
         }
 
+        /* SWAP BUTTON */
+
         .swap {
             width: 42px;
             height: 42px;
@@ -302,11 +364,9 @@
             color: var(--primary);
             font-size: 22px;
             cursor: pointer;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             margin-bottom: 5px;
             transition: 0.3s;
         }
@@ -316,6 +376,8 @@
             color: white;
             transform: rotate(180deg);
         }
+
+        /* SEARCH BUTTON */
 
         .search-btn {
             height: 53px;
@@ -335,6 +397,121 @@
             box-shadow: 0 8px 20px rgba(8,126,139,0.25);
         }
 
+        /* ================= BUS RESULTS ================= */
+
+        #busResults {
+            grid-column: 1 / -1;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .results-header {
+            margin-bottom: 18px;
+        }
+
+        .results-header h2 {
+            color: #18333f;
+            font-size: 26px;
+            margin-bottom: 5px;
+        }
+
+        .results-header p {
+            color: #62747c;
+            font-size: 14px;
+        }
+
+        .bus-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bus-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.2fr 0.8fr 1fr auto;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            transition: 0.3s;
+        }
+
+        .bus-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.10);
+        }
+
+        .bus-info h3 {
+            color: #18333f;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .bus-number {
+            color: #74838a;
+            font-size: 13px;
+        }
+
+        .bus-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #18333f;
+        }
+
+        .bus-route {
+            color: #52656e;
+            font-size: 14px;
+        }
+
+        .bus-price strong {
+            font-size: 19px;
+            color: var(--primary);
+        }
+
+        .bus-seats {
+            color: #3d626d;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .book-btn {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 11px 18px;
+            border-radius: 22px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .book-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .no-buses,
+        .searching {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .no-buses h3,
+        .searching h3 {
+            color: #18333f;
+            margin-bottom: 8px;
+        }
+
+        .no-buses p,
+        .searching p {
+            color: #687980;
+            font-size: 14px;
+        }
 
         /* ================= COMMON SECTIONS ================= */
 
@@ -358,7 +535,6 @@
             color: #62747c;
             font-size: 15px;
         }
-
 
         /* ================= OFFERS ================= */
 
@@ -533,7 +709,6 @@
             color: #555;
         }
 
-
         /* ================= CITIES ================= */
 
         .cities {
@@ -583,7 +758,6 @@
             font-size: 14px;
         }
 
-
         /* ================= SERVICES ================= */
 
         .features {
@@ -629,7 +803,6 @@
             line-height: 1.6;
         }
 
-
         /* ================= WHATSAPP ================= */
 
         .whatsapp {
@@ -649,7 +822,6 @@
             z-index: 999;
             box-shadow: 0 5px 20px rgba(0,0,0,0.20);
         }
-
 
         /* ================= FOOTER ================= */
 
@@ -671,7 +843,6 @@
             font-size: 14px;
         }
 
-
         /* ================= RESPONSIVE ================= */
 
         @media (max-width: 1100px) {
@@ -688,6 +859,10 @@
                 grid-column: 1 / -1;
             }
 
+            .bus-card {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .offers-container {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -696,7 +871,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-
 
         @media (max-width: 768px) {
 
@@ -720,7 +894,6 @@
             .hero {
                 margin-top: 125px;
                 min-height: 500px;
-
                 background-position: 65% center;
             }
 
@@ -756,6 +929,10 @@
                 grid-column: auto;
             }
 
+            .bus-card {
+                grid-template-columns: 1fr;
+            }
+
             .offers-container,
             .cities,
             .features {
@@ -768,7 +945,6 @@
                 gap: 10px;
             }
         }
-
 
         @media (max-width: 480px) {
 
@@ -809,9 +985,7 @@
     </style>
 </head>
 
-
 <body>
-
 
     <!-- ================= NAVBAR ================= -->
 
@@ -819,10 +993,7 @@
 
         <nav class="navbar">
 
-            <!-- LOGO -->
-            <!-- Clicking logo opens THIS SAME PAGE -->
-
-            <a href="index.html"
+            <a href="home.html"
                class="logo"
                aria-label="Technitude Tours and Travels Home">
 
@@ -844,14 +1015,10 @@
 
             </a>
 
-
-            <!-- NAVIGATION -->
-
             <ul class="nav-links">
 
-                <!-- Same page -->
                 <li>
-                    <a href="index.html">
+                    <a href="home.html">
                         Home
                     </a>
                 </li>
@@ -866,7 +1033,14 @@
                     <a href="contact.html">
                         Contact
                     </a>
+                
                 </li>
+                
+
+<li>
+    <a href="AboutUs.html">About Us</a>
+</li>
+
 
                 <li>
                     <a href="login.html" class="login-button">
@@ -874,12 +1048,12 @@
                     </a>
                 </li>
 
+
             </ul>
 
         </nav>
 
     </header>
-
 
 
     <!-- ================= HERO ================= -->
@@ -900,35 +1074,24 @@
             <div class="hero-features">
 
                 <div class="hero-feature">
-
                     <span class="hero-feature-icon">
                         ✓
                     </span>
-
                     Safe Travel
-
                 </div>
 
-
                 <div class="hero-feature">
-
                     <span class="hero-feature-icon">
                         🚌
                     </span>
-
                     Comfortable Bus
-
                 </div>
 
-
                 <div class="hero-feature">
-
                     <span class="hero-feature-icon">
                         ✓
                     </span>
-
                     24/7 Support
-
                 </div>
 
             </div>
@@ -938,16 +1101,11 @@
     </section>
 
 
-
     <!-- ================= BOOKING SEARCH ================= -->
 
     <form class="search-box" id="searchForm">
 
-        <!-- From / Swap / To generated by JavaScript -->
         <div id="fromToSection"></div>
-
-
-        <!-- Journey Date -->
 
         <div class="search-item">
 
@@ -972,18 +1130,13 @@
 
         </div>
 
-
-        <!-- Search -->
-
-        <button
-            type="submit"
-            class="search-btn"
-        >
+        <button type="submit" class="search-btn">
             🔍 Search Buses
         </button>
 
-    </form>
+        <div id="busResults"></div>
 
+    </form>
 
 
     <!-- ================= OFFERS ================= -->
@@ -1002,53 +1155,43 @@
 
         </div>
 
-
         <div class="offer-tabs">
 
             <button
                 type="button"
                 class="offer-tab active"
-                onclick="filterOffers('all', this)"
-            >
+                onclick="filterOffers('all', this)">
                 All
             </button>
 
             <button
                 type="button"
                 class="offer-tab"
-                onclick="filterOffers('bus', this)"
-            >
+                onclick="filterOffers('bus', this)">
                 🚌 Bus
             </button>
 
             <button
                 type="button"
                 class="offer-tab"
-                onclick="filterOffers('special', this)"
-            >
+                onclick="filterOffers('special', this)">
                 ⭐ Special
             </button>
 
             <button
                 type="button"
                 class="offer-tab"
-                onclick="filterOffers('payment', this)"
-            >
+                onclick="filterOffers('payment', this)">
                 💳 Payment
             </button>
 
         </div>
 
-
         <div class="offers-container">
-
-
-            <!-- OFFER 1 -->
 
             <div
                 class="offer-card offer-card-1"
-                data-type="bus"
-            >
+                data-type="bus">
 
                 <div class="offer-text">
 
@@ -1076,13 +1219,9 @@
             </div>
 
 
-
-            <!-- OFFER 2 -->
-
             <div
                 class="offer-card offer-card-2"
-                data-type="bus"
-            >
+                data-type="bus">
 
                 <div class="offer-text">
 
@@ -1110,13 +1249,9 @@
             </div>
 
 
-
-            <!-- OFFER 3 -->
-
             <div
                 class="offer-card offer-card-3"
-                data-type="special"
-            >
+                data-type="special">
 
                 <div class="offer-text">
 
@@ -1141,9 +1276,7 @@
 
                 </div>
 
-
                 <div class="weekend-badge">
-
                     <span>
                         TECHNITUDE
                     </span>
@@ -1155,19 +1288,14 @@
                     <span>
                         OFFER
                     </span>
-
                 </div>
 
             </div>
 
 
-
-            <!-- OFFER 4 -->
-
             <div
                 class="offer-card offer-card-4"
-                data-type="payment"
-            >
+                data-type="payment">
 
                 <div class="offer-text">
 
@@ -1192,7 +1320,6 @@
 
                 </div>
 
-
                 <div class="payment-card-icon"></div>
 
             </div>
@@ -1200,7 +1327,6 @@
         </div>
 
     </section>
-
 
 
     <!-- ================= POPULAR DESTINATIONS ================= -->
@@ -1220,14 +1346,11 @@
 
         </div>
 
-
         <div class="cities">
-
 
             <div
                 class="city-card"
-                onclick="selectCity('Kolhapur')"
-            >
+                onclick="selectCity('Kolhapur')">
 
                 <div class="city-icon">
                     🏛️
@@ -1248,11 +1371,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Pune')"
-            >
+                onclick="selectCity('Pune')">
 
                 <div class="city-icon">
                     🏙️
@@ -1273,11 +1394,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Mumbai')"
-            >
+                onclick="selectCity('Mumbai')">
 
                 <div class="city-icon">
                     🌆
@@ -1298,11 +1417,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Nashik')"
-            >
+                onclick="selectCity('Nashik')">
 
                 <div class="city-icon">
                     🛕
@@ -1323,11 +1440,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Nagpur')"
-            >
+                onclick="selectCity('Nagpur')">
 
                 <div class="city-icon">
                     🌇
@@ -1348,11 +1463,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Satara')"
-            >
+                onclick="selectCity('Satara')">
 
                 <div class="city-icon">
                     ⛰️
@@ -1373,11 +1486,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Sangli')"
-            >
+                onclick="selectCity('Sangli')">
 
                 <div class="city-icon">
                     🌉
@@ -1398,11 +1509,9 @@
             </div>
 
 
-
             <div
                 class="city-card"
-                onclick="selectCity('Goa')"
-            >
+                onclick="selectCity('Goa')">
 
                 <div class="city-icon">
                     🏖️
@@ -1427,7 +1536,6 @@
     </section>
 
 
-
     <!-- ================= SERVICES ================= -->
 
     <section class="section">
@@ -1444,9 +1552,7 @@
 
         </div>
 
-
         <div class="features">
-
 
             <div class="feature-card">
 
@@ -1466,7 +1572,6 @@
             </div>
 
 
-
             <div class="feature-card">
 
                 <div class="feature-icon">
@@ -1483,7 +1588,6 @@
                 </p>
 
             </div>
-
 
 
             <div class="feature-card">
@@ -1506,6 +1610,51 @@
         </div>
 
     </section>
+    
+<!-- ================= ABOUT US ================= -->
+<section class="section" id="about-us">
+
+    <div class="section-heading">
+        <h2>About Technitude Tours &amp; Travels</h2>
+        <p>Your journey, our responsibility.</p>
+    </div>
+
+    <div class="about-content">
+
+        <div class="about-card">
+            <div class="about-icon">🚌</div>
+            <h3>Who We Are</h3>
+            <p>
+                Technitude Tours &amp; Travels helps make bus
+                travel simple and convenient. Explore routes,
+                check available buses, and plan your journey
+                from one place.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <div class="about-icon">🎯</div>
+            <h3>Our Mission</h3>
+            <p>
+                Our goal is to provide a comfortable, reliable,
+                and user-friendly travel booking experience
+                for every passenger.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <div class="about-icon">🤝</div>
+            <h3>Why Travel With Us?</h3>
+            <p>
+                We focus on easy bus search, clear journey
+                details, convenient booking, and helpful
+                customer support throughout your travel planning.
+            </p>
+        </div>
+
+    </div>
+</section>
+<!-- ================= END ABOUT US ================= -->
 
 
 
@@ -1515,11 +1664,9 @@
         class="whatsapp"
         onclick="openWhatsApp()"
         title="Contact us"
-        aria-label="Contact Technitude on WhatsApp"
-    >
+        aria-label="Contact Technitude on WhatsApp">
         ☎
     </div>
-
 
 
     <!-- ================= FOOTER ================= -->
@@ -1543,15 +1690,11 @@
     </footer>
 
 
-
     <!-- ================= JAVASCRIPT ================= -->
 
     <script>
 
-
-        /* =========================================
-           AVAILABLE CITIES
-        ========================================= */
+        /* ================= AVAILABLE CITIES ================= */
 
         const cities = [
             "Kolhapur",
@@ -1565,10 +1708,7 @@
         ];
 
 
-
-        /* =========================================
-           CREATE CITY OPTIONS
-        ========================================= */
+        /* ================= CREATE CITY OPTIONS ================= */
 
         function createCityOptions(
             selectedCity = "",
@@ -1598,10 +1738,7 @@
         }
 
 
-
-        /* =========================================
-           CREATE FROM / TO COMPONENT
-        ========================================= */
+        /* ================= CREATE FROM / TO ================= */
 
         function createFromToSection() {
 
@@ -1611,7 +1748,6 @@
             if (!container) {
                 return;
             }
-
 
             container.innerHTML = `
 
@@ -1647,8 +1783,7 @@
                     class="swap"
                     id="swapBtn"
                     title="Swap cities"
-                    aria-label="Swap cities"
-                >
+                    aria-label="Swap cities">
                     ⇄
                 </button>
 
@@ -1685,16 +1820,7 @@
         }
 
 
-
-        /* =========================================
-           REFRESH CITY OPTIONS
-
-           If From = Pune
-           Pune will NOT appear in To.
-
-           If To = Mumbai
-           Mumbai will NOT appear in From.
-        ========================================= */
+        /* ================= REFRESH CITY OPTIONS ================= */
 
         function refreshCityOptions() {
 
@@ -1708,10 +1834,8 @@
                 return;
             }
 
-
             const fromValue = from.value;
             const toValue = to.value;
-
 
             from.innerHTML =
                 createCityOptions(
@@ -1719,23 +1843,18 @@
                     toValue
                 );
 
-
             to.innerHTML =
                 createCityOptions(
                     toValue,
                     fromValue
                 );
 
-
             from.value = fromValue;
             to.value = toValue;
         }
 
 
-
-        /* =========================================
-           FROM / TO EVENTS
-        ========================================= */
+        /* ================= FROM / TO EVENTS ================= */
 
         function setupFromToEvents() {
 
@@ -1748,17 +1867,14 @@
             const swap =
                 document.getElementById("swapBtn");
 
-
             if (!from || !to || !swap) {
                 return;
             }
-
 
             from.addEventListener(
                 "change",
                 refreshCityOptions
             );
-
 
             to.addEventListener(
                 "change",
@@ -1778,20 +1894,17 @@
                     const toValue =
                         to.value;
 
-
                     from.innerHTML =
                         createCityOptions(
                             toValue,
                             fromValue
                         );
 
-
                     to.innerHTML =
                         createCityOptions(
                             fromValue,
                             toValue
                         );
-
 
                     from.value = toValue;
                     to.value = fromValue;
@@ -1801,182 +1914,323 @@
         }
 
 
-
-        /* =========================================
-           INITIALIZE FROM / TO
-        ========================================= */
+        /* ================= INITIALIZE FROM / TO ================= */
 
         createFromToSection();
 
 
+        /* ================= JOURNEY DATE ================= */
 
- /* =========================================
-   JOURNEY DATE
-========================================= */
+        const journeyDate =
+            document.getElementById("journeyDate");
 
-const journeyDate = document.getElementById("journeyDate");
+        if (journeyDate) {
 
-if (journeyDate) {
+            const now = new Date();
 
-    const now = new Date();
+            const year =
+                now.getFullYear();
 
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+            const month =
+                String(now.getMonth() + 1)
+                .padStart(2, "0");
 
-    const today = `${year}-${month}-${day}`;
+            const day =
+                String(now.getDate())
+                .padStart(2, "0");
 
-    journeyDate.min = today;
+            const today =
+                `${year}-${month}-${day}`;
 
-    journeyDate.addEventListener("click", function () {
-        if (typeof this.showPicker === "function") {
-            this.showPicker();
+            journeyDate.min = today;
+
+            journeyDate.addEventListener(
+                "click",
+                function() {
+
+                    if (
+                        typeof this.showPicker === "function"
+                    ) {
+                        this.showPicker();
+                    }
+
+                }
+            );
         }
-    });
-}
 
 
-
-        /* =========================================
-           SEARCH FORM
-        ========================================= */
+        /* ================= BUS SEARCH ================= */
 
         document
-    .getElementById("searchForm")
-    .addEventListener("submit", async function(event) {
+            .getElementById("searchForm")
+            .addEventListener(
+                "submit",
+                async function(event) {
 
-        event.preventDefault();
+                    event.preventDefault();
 
-        const from =
-            document.getElementById("origin").value;
+                    const from =
+                        document.getElementById("origin").value;
 
-        const to =
-            document.getElementById("destination").value;
+                    const to =
+                        document.getElementById("destination").value;
 
-        const journey =
-            document.getElementById("journeyDate").value;
+                    const journey =
+                        document.getElementById("journeyDate").value;
 
-
-        /* Validation */
-
-        if (!from || !to || !journey) {
-            alert("Please select From, To and Journey Date.");
-            return;
-        }
+                    const results =
+                        document.getElementById("busResults");
 
 
-        if (from === to) {
-            alert("From and To cities cannot be the same.");
-            return;
-        }
+                    /* VALIDATION */
+
+                    if (!from || !to || !journey) {
+
+                        results.innerHTML = `
+                            <div class="no-buses">
+                                <h3>Please Select All Fields</h3>
+                                <p>
+                                    Select From, To and Journey Date.
+                                </p>
+                            </div>
+                        `;
+
+                        return;
+                    }
 
 
-        /* Search buses from Python Flask */
+                    if (from === to) {
 
-        try {
+                        results.innerHTML = `
+                            <div class="no-buses">
+                                <h3>Invalid Route</h3>
+                                <p>
+                                    From and To cities cannot be the same.
+                                </p>
+                            </div>
+                        `;
 
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/search",
-                {
-                    method: "POST",
+                        return;
+                    }
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
 
-                    body: JSON.stringify({
-                        from: from,
-                        to: to,
-                        journey_date: journey
-                    })
+                    /* SEARCHING */
+
+                    results.innerHTML = `
+                        <div class="searching">
+                            <h3>Searching Buses...</h3>
+                            <p>Please wait.</p>
+                        </div>
+                    `;
+
+
+                    try {
+
+                        /* NODE.JS API */
+
+                        const response = await fetch(
+                            `/api/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(journey)}`
+                        );
+
+
+                        const buses =
+                            await response.json();
+
+
+                        /* API ERROR */
+
+                        if (!response.ok) {
+
+                            results.innerHTML = `
+                                <div class="no-buses">
+                                    <h3>Search Error</h3>
+                                    <p>
+                                        ${buses.message || "Database error"}
+                                    </p>
+                                </div>
+                            `;
+
+                            return;
+                        }
+
+
+                        /* NO BUS */
+
+                        if (buses.length === 0) {
+
+                            results.innerHTML = `
+                                <div class="no-buses">
+                                    <h3>No Buses Available</h3>
+
+                                    <p>
+                                        No buses found from
+                                        <strong>${from}</strong>
+                                        to
+                                        <strong>${to}</strong>
+                                        on
+                                        <strong>${journey}</strong>.
+                                    </p>
+                                </div>
+                            `;
+
+                            return;
+                        }
+
+
+                        /* BUS RESULTS */
+
+                        results.innerHTML = `
+
+                            <div class="results-header">
+
+                                <h2>
+                                    Available Buses
+                                </h2>
+
+                                <p>
+                                    ${from} → ${to}
+                                    &nbsp; | &nbsp;
+                                    ${journey}
+                                </p>
+
+                            </div>
+
+
+                            <div class="bus-results-list">
+
+                                ${buses.map(function(bus) {
+
+                                    return `
+
+                                        <div class="bus-card">
+
+                                            <div class="bus-info">
+
+                                                <h3>
+                                                    ${bus.bus_name}
+                                                </h3>
+
+                                                <p class="bus-number">
+                                                    ${bus.bus_number || ""}
+                                                </p>
+
+                                            </div>
+
+
+                                            <div class="bus-time">
+
+                                                <strong>
+                                                    ${bus.departure_time}
+                                                </strong>
+
+                                                <span>
+                                                    →
+                                                </span>
+
+                                                <strong>
+                                                    ${bus.arrival_time}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div class="bus-route">
+
+                                                <span>
+                                                    ${bus.from_city}
+                                                </span>
+
+                                                →
+                                                
+                                                <span>
+                                                    ${bus.to_city}
+                                                </span>
+
+                                            </div>
+
+
+                                            <div class="bus-price">
+
+                                                <strong>
+                                                    ₹${bus.price}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div class="bus-seats">
+
+                                                ${bus.seats_available}
+                                                Seats Available
+
+                                            </div>
+
+
+                                           <button class="book-btn" onclick="bookBus(${bus.id})">
+    Book Now
+</button>
+                                        </div>
+
+                                    `;
+
+                                }).join("")}
+
+                            </div>
+
+                        `;
+
+
+                        /* SCROLL TO RESULTS */
+
+                        results.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+
+                    }
+
+
+                    catch (error) {
+
+                        console.error(error);
+
+                        results.innerHTML = `
+                            <div class="no-buses">
+
+                                <h3>
+                                    Server Connection Error
+                                </h3>
+
+                                <p>
+                                    Please make sure
+                                    Node.js server is running.
+                                </p>
+
+                            </div>
+                        `;
+
+                    }
+
                 }
             );
 
 
-            const data = await response.json();
+        /* ================= BOOK BUS ================= */
+function bookBus(busId) {
 
+    const from = document.getElementById("origin").value;
+    const to = document.getElementById("destination").value;
+    const date = document.getElementById("journeyDate").value;
 
-            if (!data.success) {
-
-                alert(
-                    "Error: " +
-                    data.error
-                );
-
-                return;
-            }
-
-
-            /* No buses found */
-
-            if (data.buses.length === 0) {
-
-                alert(
-                    "No buses available from " +
-                    from +
-                    " to " +
-                    to +
-                    " on " +
-                    journey
-                );
-
-                return;
-            }
-
-
-            /* Show buses */
-
-            let busMessage =
-                "Available Buses:\\n\\n";
-
-
-            data.buses.forEach(function(bus) {
-
-                busMessage +=
-                    "Bus: " +
-                    bus.bus_name +
-                    "\\n" +
-
-                    "Type: " +
-                    bus.bus_type +
-                    "\\n" +
-
-                    "Departure: " +
-                    bus.departure_time +
-                    "\\n" +
-
-                    "Arrival: " +
-                    bus.arrival_time +
-                    "\\n" +
-
-                    "Price: ₹" +
-                    bus.price +
-                    "\\n\\n";
-
-            });
-
-
-            alert(busMessage);
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Cannot connect to Technitude server. " +
-                "Please make sure Python Flask is running."
-            );
-
-        }
-
-    });
-
-
-        /* =========================================
-           POPULAR CITY CARD
-        ========================================= */
+    window.location.href =
+        "bus-results.html?from=" +
+        encodeURIComponent(from) +
+        "&to=" +
+        encodeURIComponent(to) +
+        "&date=" +
+        encodeURIComponent(date);
+}
+        /* ================= POPULAR CITY ================= */
 
         function selectCity(city) {
 
@@ -1986,29 +2240,18 @@ if (journeyDate) {
             const to =
                 document.getElementById("destination");
 
-
             if (!from || !to) {
                 return;
             }
 
 
-            /*
-                If From is empty,
-                clicked city becomes To.
-            */
-
             if (!from.value) {
 
-                to.value = city;
+                from.value = city;
 
                 refreshCityOptions();
 
             }
-
-            /*
-                If From already has a city,
-                clicked city becomes To.
-            */
 
             else if (from.value !== city) {
 
@@ -2025,13 +2268,11 @@ if (journeyDate) {
                     behavior: "smooth",
                     block: "center"
                 });
+
         }
 
 
-
-        /* =========================================
-           OFFER FILTER
-        ========================================= */
+        /* ================= OFFER FILTER ================= */
 
         function filterOffers(
             type,
@@ -2075,20 +2316,21 @@ if (journeyDate) {
                     card.style.display =
                         "block";
 
-                } else {
+                }
+
+                else {
 
                     card.style.display =
                         "none";
+
                 }
 
             });
+
         }
 
 
-
-        /* =========================================
-           WHATSAPP
-        ========================================= */
+        /* ================= WHATSAPP ================= */
 
         function openWhatsApp() {
 
@@ -2098,7 +2340,6 @@ if (journeyDate) {
             );
 
         }
-
 
     </script>
 

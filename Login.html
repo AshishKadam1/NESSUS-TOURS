@@ -7,9 +7,6 @@
     <title>Account - Nessus Tours & Travels</title>
 
     <style>
-        /* =====================================================
-           GLOBAL & VARIABLES
-        ===================================================== */
 
         * {
             margin: 0;
@@ -38,21 +35,7 @@
             position: relative;
         }
 
-        /* =====================================================
-           HOME PAGE BACKGROUND
-        ===================================================== */
-
-        .bg-home-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            pointer-events: none;
-            user-select: none;
-            filter: brightness(0.9);
-        }
-
-        /* HEADER */
+        /* ================= HEADER ================= */
 
         header {
             width: 100%;
@@ -124,11 +107,6 @@
             color: var(--dark);
             font-size: 15px;
             font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
         }
 
         .login-button {
@@ -138,13 +116,7 @@
             border-radius: 25px;
         }
 
-        .login-button:hover {
-            background: var(--primary-dark);
-        }
-
-        /* =====================================================
-           HERO
-        ===================================================== */
+        /* ================= HERO ================= */
 
         .hero {
             height: 555px;
@@ -201,7 +173,6 @@
             color: #073b4c;
             font-weight: 800;
             margin-bottom: 18px;
-            text-shadow: 0 3px 6px rgba(255, 255, 255, 0.7);
         }
 
         .hero-content p {
@@ -212,15 +183,13 @@
             font-weight: 500;
         }
 
-        /* =====================================================
-           SEARCH BOX
-        ===================================================== */
+        /* ================= SEARCH ================= */
 
         .search-box {
             width: min(94%, 1150px);
             margin: -55px auto 60px;
             position: relative;
-            z-index: 50;
+            z-index: 1;
             background: white;
             border-radius: 20px;
             padding: 25px;
@@ -229,6 +198,8 @@
             grid-template-columns: 1.2fr 50px 1.2fr 1fr 1fr 170px;
             gap: 10px;
             align-items: end;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
         .search-item label {
@@ -259,9 +230,7 @@
             font-weight: 700;
         }
 
-        /* =====================================================
-           MODAL OVERLAY
-        ===================================================== */
+        /* ================= MODAL ================= */
 
         .login-overlay {
             position: fixed;
@@ -273,7 +242,7 @@
             background: rgba(11, 48, 65, 0.45);
             backdrop-filter: blur(2px);
 
-            z-index: 10;
+            z-index: 1000;
 
             display: flex;
             align-items: center;
@@ -286,6 +255,9 @@
 
         .login-card {
             width: min(100%, 450px);
+            max-height: 92vh;
+            overflow-y: auto;
+
             background: var(--white);
             border-radius: 20px;
             padding: 36px 32px;
@@ -313,6 +285,7 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
+
         }
 
         .close-btn {
@@ -330,17 +303,9 @@
             line-height: 1;
 
             cursor: pointer;
-
-            transition: 0.2s;
         }
 
-        .close-btn:hover {
-            color: var(--dark);
-        }
-
-        /* =====================================================
-           FORM
-        ===================================================== */
+        /* ================= FORM ================= */
 
         .form-view {
             display: none;
@@ -376,7 +341,8 @@
             margin-bottom: 7px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             height: 48px;
 
@@ -395,28 +361,10 @@
             transition: 0.3s;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(8, 126, 139, 0.12);
-        }
-
-        .form-group input.error {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.12);
-        }
-
-        .error-message {
-            display: none;
-
-            font-size: 12px;
-            color: #e74c3c;
-
-            margin-top: 5px;
-            margin-left: 2px;
-        }
-
-        .error-message.visible {
-            display: block;
         }
 
         .form-options {
@@ -449,12 +397,6 @@
 
             cursor: pointer;
             padding: 0;
-
-            text-decoration: none;
-        }
-
-        .link-btn:hover {
-            text-decoration: underline;
         }
 
         .submit-btn {
@@ -477,9 +419,7 @@
 
         .submit-btn:hover {
             background: var(--primary-dark);
-
             transform: translateY(-2px);
-
             box-shadow: 0 8px 20px rgba(8, 126, 139, 0.25);
         }
 
@@ -490,14 +430,41 @@
             color: #687a82;
         }
 
+        .role-description {
+            font-size: 12px;
+            color: #687a82;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 800px) {
+
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links li:not(:last-child) {
+                display: none;
+            }
+
+            .hero-content h1 {
+                font-size: 42px;
+            }
+
+            .search-box {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
     </style>
 </head>
 
+
 <body>
 
-    <!-- =====================================================
-         HOME PAGE BACKGROUND
-    ===================================================== -->
+
+    <!-- ================= HOME BACKGROUND ================= -->
 
     <div class="bg-home-wrapper">
 
@@ -524,6 +491,7 @@
                     </div>
 
                 </a>
+
 
                 <ul class="nav-links">
 
@@ -555,19 +523,10 @@
 
             </nav>
 
-            <button
-                type="button"
-                class="close-btn"
-                onclick="goToPreviousPage()"
-                title="Close"
-                style="position: absolute; top: 20px; right: 25px; z-index: 1001;">
-                &times;
-            </button>
-
         </header>
 
 
-        <!-- HERO -->
+        <!-- ================= HERO ================= -->
 
         <section class="hero">
 
@@ -586,7 +545,7 @@
         </section>
 
 
-        <!-- SEARCH BOX -->
+        <!-- ================= SEARCH BOX ================= -->
 
         <form class="search-box">
 
@@ -597,9 +556,11 @@
                 </label>
 
                 <select>
+
                     <option>
                         Select city
                     </option>
+
                 </select>
 
             </div>
@@ -617,9 +578,11 @@
                 </label>
 
                 <select>
+
                     <option>
                         Select city
                     </option>
+
                 </select>
 
             </div>
@@ -660,17 +623,17 @@
     </div>
 
 
-    <!-- =====================================================
-         LOGIN MODAL
-    ===================================================== -->
+    <!-- ================= LOGIN MODAL ================= -->
 
     <div
         class="login-overlay"
         onclick="goToPreviousPage()">
 
+
         <div
             class="login-card"
             onclick="event.stopPropagation()">
+
 
             <button
                 type="button"
@@ -683,13 +646,12 @@
             </button>
 
 
-            <!-- =================================================
-                 LOGIN FORM
-            ================================================= -->
+            <!-- ================= LOGIN ================= -->
 
             <div
                 id="loginView"
                 class="form-view active">
+
 
                 <div class="login-header">
 
@@ -706,6 +668,7 @@
 
                 <form onsubmit="handleAuthSubmit(event)">
 
+
                     <div class="form-group">
 
                         <label for="loginEmail">
@@ -717,11 +680,6 @@
                             id="loginEmail"
                             placeholder="Enter email or mobile"
                             required>
-
-                        <span
-                            class="error-message"
-                            id="loginEmailError">
-                        </span>
 
                     </div>
 
@@ -737,11 +695,6 @@
                             id="loginPassword"
                             placeholder="Enter password"
                             required>
-
-                        <span
-                            class="error-message"
-                            id="loginPasswordError">
-                        </span>
 
                     </div>
 
@@ -798,13 +751,12 @@
             </div>
 
 
-            <!-- =================================================
-                 REGISTER FORM
-            ================================================= -->
+            <!-- ================= REGISTER ================= -->
 
             <div
                 id="registerView"
                 class="form-view">
+
 
                 <div class="login-header">
 
@@ -813,13 +765,14 @@
                     </h2>
 
                     <p>
-                        Sign up to start booking your trips
+                        Sign up to use Nessus Tours & Travels
                     </p>
 
                 </div>
 
 
                 <form onsubmit="handleAuthSubmit(event)">
+
 
                     <!-- FULL NAME -->
 
@@ -873,6 +826,48 @@
                     </div>
 
 
+                    <!-- ROLE -->
+
+                    <div class="form-group">
+
+                        <label for="regRole">
+                            Account Type
+                        </label>
+
+                        <select
+                            id="regRole"
+                            required>
+
+                            <option value="" disabled selected>
+                                Select account type
+                            </option>
+
+                            <option value="CUSTOMER">
+                                Customer / User
+                            </option>
+
+                            <option value="AGENT">
+                                Agent
+                            </option>
+
+                            <option value="OPERATOR">
+                                Bus Operator
+                            </option>
+
+                            <option value="SUPPORT">
+                                Support Staff
+                            </option>
+
+                        </select>
+
+
+                        <div class="role-description">
+                            Select the type of account you want to register.
+                        </div>
+
+                    </div>
+
+
                     <!-- PASSWORD -->
 
                     <div class="form-group">
@@ -919,13 +914,12 @@
             </div>
 
 
-            <!-- =================================================
-                 FORGOT PASSWORD
-            ================================================= -->
+            <!-- ================= FORGOT PASSWORD ================= -->
 
             <div
                 id="forgotView"
                 class="form-view">
+
 
                 <div class="login-header">
 
@@ -941,6 +935,7 @@
 
 
                 <form onsubmit="handleAuthSubmit(event)">
+
 
                     <div class="form-group">
 
@@ -985,22 +980,18 @@
 
             </div>
 
+
         </div>
 
     </div>
 
 
-    <!-- =====================================================
-         JAVASCRIPT
-    ===================================================== -->
+    <!-- ================= JAVASCRIPT ================= -->
 
     <script>
 
-        /*
-        ========================================================
-        GO BACK TO HOME
-        ========================================================
-        */
+
+        /* ================= GO HOME ================= */
 
         function goToPreviousPage() {
 
@@ -1009,11 +1000,7 @@
         }
 
 
-        /*
-        ========================================================
-        SWITCH BETWEEN LOGIN / REGISTER / FORGOT PASSWORD
-        ========================================================
-        */
+        /* ================= SWITCH VIEW ================= */
 
         function switchView(viewId) {
 
@@ -1030,16 +1017,10 @@
                 .getElementById(viewId)
                 .classList.add('active');
 
-            clearErrors();
-
         }
 
 
-        /*
-        ========================================================
-        MAIN AUTHENTICATION FUNCTION
-        ========================================================
-        */
+        /* ================= AUTH SUBMIT ================= */
 
         async function handleAuthSubmit(event) {
 
@@ -1048,11 +1029,9 @@
             const form = event.target;
 
 
-            /*
-            ====================================================
-            LOGIN
-            ====================================================
-            */
+            /* ==================================================
+               LOGIN
+            ================================================== */
 
             if (form.closest('#loginView')) {
 
@@ -1067,32 +1046,11 @@
                         .getElementById('loginPassword')
                         .value;
 
-                const emailInput =
-                    document.getElementById('loginEmail');
 
-                const passwordInput =
-                    document.getElementById('loginPassword');
+                if (!emailOrMobile || !password) {
 
-                const emailError =
-                    document.getElementById('loginEmailError');
-
-                const passwordError =
-                    document.getElementById('loginPasswordError');
-
-
-                clearErrors();
-
-
-                /*
-                VALIDATE LOGIN INPUT
-                */
-
-                if (!emailOrMobile) {
-
-                    showError(
-                        emailInput,
-                        emailError,
-                        'Please enter your email or mobile number'
+                    alert(
+                        'Please enter your email/mobile and password.'
                     );
 
                     return;
@@ -1102,33 +1060,14 @@
 
                 if (!validateEmailOrMobile(emailOrMobile)) {
 
-                    showError(
-                        emailInput,
-                        emailError,
-                        'Enter a valid email or 10-digit mobile number'
+                    alert(
+                        'Enter a valid email or 10-digit mobile number.'
                     );
 
                     return;
 
                 }
 
-
-                if (!password) {
-
-                    showError(
-                        passwordInput,
-                        passwordError,
-                        'Please enter your password'
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                SEND LOGIN REQUEST TO BACKEND
-                */
 
                 try {
 
@@ -1136,6 +1075,7 @@
                         await fetch(
                             'http://localhost:3000/api/login',
                             {
+
                                 method: 'POST',
 
                                 headers: {
@@ -1160,179 +1100,58 @@
                         await response.json();
 
 
-                    /*
-                    LOGIN SUCCESS
-                    */
-
                     if (data.success) {
 
-                        alert('Login successful!');
+                        /*
+                        Store logged-in user information
+                        so other pages can identify the role.
+                        */
 
-                        window.location.href =
-                            'home.html';
-
-                    }
-
-
-                    /*
-                    LOGIN FAILED
-                    */
-
-                    else {
-
-                        showError(
-                            emailInput,
-                            emailError,
-                            data.message
+                        localStorage.setItem(
+                            'loggedInUser',
+                            JSON.stringify(data.user)
                         );
 
-                    }
-
-                }
-
-                catch (error) {
-
-                    console.error(error);
-
-                    alert(
-                        'Unable to connect to the server.'
-                    );
-
-                }
-
-
-                return;
-
-            }
-
-
-            /*
-            ====================================================
-            REGISTER
-            ====================================================
-            */
-
-            if (form.closest('#registerView')) {
-
-                const fullName =
-                    document
-                        .getElementById('regName')
-                        .value
-                        .trim();
-
-                const email =
-                    document
-                        .getElementById('regEmail')
-                        .value
-                        .trim();
-
-                const phone =
-                    document
-                        .getElementById('regPhone')
-                        .value
-                        .trim();
-
-                const password =
-                    document
-                        .getElementById('regPassword')
-                        .value;
-
-
-                /*
-                VALIDATE REQUIRED FIELDS
-                */
-
-                if (
-                    !fullName ||
-                    !email ||
-                    !phone ||
-                    !password
-                ) {
-
-                    alert(
-                        'Please fill in all fields.'
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                VALIDATE PHONE
-                */
-
-                if (!/^\d{10}$/.test(phone)) {
-
-                    alert(
-                        'Please enter a valid 10-digit mobile number.'
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                SEND REGISTRATION REQUEST
-                */
-
-                try {
-
-                    const response =
-                        await fetch(
-                            'http://localhost:3000/api/register',
-                            {
-                                method: 'POST',
-
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-
-                                body: JSON.stringify({
-
-                                    full_name:
-                                        fullName,
-
-                                    email:
-                                        email,
-
-                                    phone:
-                                        phone,
-
-                                    password:
-                                        password
-
-                                })
-
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
-
-
-                    /*
-                    REGISTRATION SUCCESS
-                    */
-
-                    if (data.success) {
 
                         alert(
-                            'Registration successful! You can now login.'
+                            'Login successful!'
                         );
 
-                        form.reset();
 
-                        switchView('loginView');
+                        /*
+                        Later we can redirect users
+                        according to their role.
+                        */
+
+                        if (data.user.role === 'CUSTOMER') {
+
+                            window.location.href =
+                                'home.html';
+
+                        }
+
+                        else if (data.user.role === 'AGENT') {
+
+                            window.location.href =
+                                'agent-dashboard.html';
+
+                        }
+
+                        else if (data.user.role === 'OPERATOR') {
+
+                            window.location.href =
+                                'operator-dashboard.html';
+
+                        }
+
+                        else if (data.user.role === 'SUPPORT') {
+
+                            window.location.href =
+                                'support-dashboard.html';
+
+                        }
 
                     }
-
-
-                    /*
-                    REGISTRATION FAILED
-                    */
 
                     else {
 
@@ -1358,11 +1177,189 @@
             }
 
 
-            /*
-            ====================================================
-            FORGOT PASSWORD
-            ====================================================
-            */
+            /* ==================================================
+               REGISTER
+            ================================================== */
+
+            if (form.closest('#registerView')) {
+
+                const fullName =
+                    document
+                        .getElementById('regName')
+                        .value
+                        .trim();
+
+                const email =
+                    document
+                        .getElementById('regEmail')
+                        .value
+                        .trim();
+
+                const phone =
+                    document
+                        .getElementById('regPhone')
+                        .value
+                        .trim();
+
+                const role =
+                    document
+                        .getElementById('regRole')
+                        .value;
+
+                const password =
+                    document
+                        .getElementById('regPassword')
+                        .value;
+
+
+                /* REQUIRED FIELD VALIDATION */
+
+                if (
+                    !fullName ||
+                    !email ||
+                    !phone ||
+                    !role ||
+                    !password
+                ) {
+
+                    alert(
+                        'Please fill in all fields.'
+                    );
+
+                    return;
+
+                }
+
+
+                /* PHONE VALIDATION */
+
+                if (!/^\d{10}$/.test(phone)) {
+
+                    alert(
+                        'Please enter a valid 10-digit mobile number.'
+                    );
+
+                    return;
+
+                }
+
+
+                /* EMAIL VALIDATION */
+
+                const emailRegex =
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (!emailRegex.test(email)) {
+
+                    alert(
+                        'Please enter a valid email address.'
+                    );
+
+                    return;
+
+                }
+
+
+                /* PASSWORD VALIDATION */
+
+                if (password.length < 6) {
+
+                    alert(
+                        'Password must contain at least 6 characters.'
+                    );
+
+                    return;
+
+                }
+
+
+                /* ==================================================
+                   SEND REGISTRATION REQUEST
+                ================================================== */
+
+                try {
+
+                    const response =
+                        await fetch(
+                            'http://localhost:3000/api/register',
+                            {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+
+                                body: JSON.stringify({
+
+                                    full_name:
+                                        fullName,
+
+                                    email:
+                                        email,
+
+                                    phone:
+                                        phone,
+
+                                    password:
+                                        password,
+
+                                    role:
+                                        role
+
+                                })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (data.success) {
+
+                        alert(
+                            'Registration successful! You can now login.'
+                        );
+
+                        form.reset();
+
+                        switchView(
+                            'loginView'
+                        );
+
+                    }
+
+                    else {
+
+                        alert(
+                            data.message
+                        );
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Unable to connect to the server.'
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            /* ==================================================
+               FORGOT PASSWORD
+            ================================================== */
 
             if (form.closest('#forgotView')) {
 
@@ -1375,82 +1372,9 @@
         }
 
 
-        /*
-        ========================================================
-        SHOW ERROR
-        ========================================================
-        */
-
-        function showError(
-            input,
-            errorElement,
-            message
-        ) {
-
-            input.classList.add('error');
-
-            errorElement.textContent =
-                message;
-
-            errorElement.classList.add(
-                'visible'
-            );
-
-        }
-
-
-        /*
-        ========================================================
-        CLEAR ERRORS
-        ========================================================
-        */
-
-        function clearErrors() {
-
-            const inputs =
-                document.querySelectorAll(
-                    '.form-group input'
-                );
-
-            const errors =
-                document.querySelectorAll(
-                    '.error-message'
-                );
-
-
-            inputs.forEach(function (input) {
-
-                input.classList.remove(
-                    'error'
-                );
-
-            });
-
-
-            errors.forEach(function (error) {
-
-                error.textContent = '';
-
-                error.classList.remove(
-                    'visible'
-                );
-
-            });
-
-        }
-
-
-        /*
-        ========================================================
-        VALIDATE EMAIL OR MOBILE
-        ========================================================
-        */
+        /* ================= VALIDATE LOGIN ================= */
 
         function validateEmailOrMobile(input) {
-
-            /*
-            EMAIL
-            */
 
             if (input.includes('@')) {
 
@@ -1462,76 +1386,13 @@
             }
 
 
-            /*
-            MOBILE
-            */
+            const mobileRegex =
+                /^\d{10}$/;
 
-            else {
-
-                const mobileRegex =
-                    /^\d{10}$/;
-
-                return mobileRegex.test(input);
-
-            }
+            return mobileRegex.test(input);
 
         }
 
-
-        /*
-        ========================================================
-        CLEAR LOGIN ERRORS WHILE TYPING
-        ========================================================
-        */
-
-        document
-            .getElementById('loginEmail')
-            .addEventListener(
-                'input',
-                function () {
-
-                    this.classList.remove(
-                        'error'
-                    );
-
-                    const error =
-                        document.getElementById(
-                            'loginEmailError'
-                        );
-
-                    error.classList.remove(
-                        'visible'
-                    );
-
-                    error.textContent = '';
-
-                }
-            );
-
-
-        document
-            .getElementById('loginPassword')
-            .addEventListener(
-                'input',
-                function () {
-
-                    this.classList.remove(
-                        'error'
-                    );
-
-                    const error =
-                        document.getElementById(
-                            'loginPasswordError'
-                        );
-
-                    error.classList.remove(
-                        'visible'
-                    );
-
-                    error.textContent = '';
-
-                }
-            );
 
     </script>
 
