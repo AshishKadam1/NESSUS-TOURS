@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Technitude Tours & Travels</title>
+
+    <style>
+        /* =====================================================
+           GLOBAL & VARIABLES (MATCHING HOME PAGE)
+        ===================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        :root {
+            --primary: #087e8b;
+            --primary-dark: #065a63;
+            --secondary: #0b4f6c;
+            --accent: #00a9c7;
+            --dark: #172f3d;
+            --text: #263943;
+            --light: #f5f9fa;
+            --white: #ffffff;
+            --border: #d8e4e8;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+        header {
+            width: 100%;
+            height: 82px;
+            background: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.10);
+        }
+
+        .navbar {
+            width: min(1250px, 94%);
+            height: 82px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00b4d8, #087e8b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 18px;
+            border: 4px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+            transition: 0.3s;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            line-height: 1.1;
+        }
+
+        .logo-main {
+            display: block;
+            color: var(--secondary);
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .logo-sub {
+            display: block;
+            color: var(--primary);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .login-button {
+            background: var(--primary);
+            color: white !important;
+            padding: 12px 25px;
+            border-radius: 25px;
+        }
+
+        .login-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =====================================================
+           PAGE HEADER / BANNER
+        ===================================================== */
+        .page-banner {
+            margin-top: 82px;
+            background: linear-gradient(90deg, rgba(8, 126, 139, 0.9), rgba(11, 79, 108, 0.95)), 
+                        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=90") center/cover;
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .page-banner h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .page-banner p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* =====================================================
+           CONTACT CONTENT SECTION
+        ===================================================== */
+        .contact-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 35px;
+            flex: 1;
+        }
+
+        .info-card, .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 50, 70, 0.06);
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: var(--dark);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #62747c;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        /* INFO ITEMS */
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .info-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5f6f8;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .info-text h4 {
+            font-size: 16px;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .info-text p {
+            font-size: 14px;
+            color: #52656e;
+            line-height: 1.4;
+        }
+
+        /* FORM ELEMENTS */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #52656e;
+            margin-bottom: 7px;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0 14px;
+            background: white;
+            color: var(--dark);
+            outline: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .form-group input, 
+        .form-group select {
+            height: 48px;
+        }
+
+        .form-group textarea {
+            padding: 14px;
+            resize: vertical;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(8, 126, 139, 0.12);
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 25px;
+            background: var(--primary);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(8, 126, 139, 0.25);
+        }
+
+        /* =====================================================
+           WHATSAPP FLOATING BUTTON
+        ===================================================== */
+        .whatsapp {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            width: 55px;
+            height: 55px;
+            background: #25d366;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.20);
+            transition: 0.3s;
+        }
+
+        .whatsapp:hover {
+            transform: scale(1.1);
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+        footer {
+            background: #123746;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: auto;
+        }
+
+        footer h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        footer p {
+            color: #c6d8dd;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           RESPONSIVE DESIGN
+        ===================================================== */
+        @media (max-width: 900px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                height: auto;
+            }
+
+            .navbar {
+                height: auto;
+                padding: 12px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-banner {
+                margin-top: 125px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
+    <header>
+        <nav class="navbar">
+            <a href="home.html" class="logo">
+                <div class="logo-icon">TT</div>
+                <div class="logo-text">
+                    <span class="logo-main">Technitude</span>
+                    <span class="logo-sub">Tours & Travels</span>
+                </div>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="bookings.html">Manage Bookings</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="aboutus.html">About Us</a></li>
+                <li>
+                    <a href="login.html" class="login-button">
+                        Login
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- =====================================================
+         PAGE BANNER
+    ===================================================== -->
+    <section class="page-banner">
+        <h1>Contact Us</h1>
+        <p>We are here to assist you with your journeys 24/7</p>
+    </section>
+
+    <!-- =====================================================
+         MAIN CONTACT CONTENT
+    ===================================================== -->
+    <div class="contact-container">
+
+        <!-- LEFT: CONTACT INFORMATION CARD -->
+        <div class="info-card">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-subtitle">Have questions or need help with a booking? Reach out to our team through any of the channels below.</p>
+
+            <div class="info-item">
+                <div class="info-icon">📍</div>
+                <div class="info-text">
+                    <h4>Headquarters</h4>
+                    <p>Technitude Travels Hub, Station Road, Pune / Kolhapur, Maharashtra</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">📞</div>
+                <div class="info-text">
+                    <h4>Customer Support</h4>
+                    <p>+91 99999 99999<br>+91 88888 88888</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">✉️</div>
+                <div class="info-text">
+                    <h4>Email Support</h4>
+                    <p>support@technitudetours.com<br>info@technitudetours.com</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">🎧</div>
+                <div class="info-text">
+                    <h4>Working Hours</h4>
+                    <p>24/7 Customer Service Available</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: CONTACT FORM CARD -->
+        <div class="form-card">
+            <h2 class="section-title">Send a Message</h2>
+            <p class="section-subtitle">Fill out the form below and our team will get back to you shortly.</p>
+
+            <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailAddress">Email Address</label>
+                    <input type="email" id="emailAddress" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber">Mobile Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="Enter 10-digit mobile number">
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" required>
+                        <option value="">Select subject</option>
+                        <option value="Booking Inquiry">Booking Inquiry</option>
+                        <option value="Cancellation & Refund">Cancellation & Refund</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" rows="4" placeholder="Write your query here..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    📩 Send Message
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         WHATSAPP FLOATING BUTTON
+    ===================================================== -->
+    <div class="whatsapp" onclick="openWhatsApp()" title="Contact us on WhatsApp">
+        ☎
+    </div>
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+    <footer>
+        <h3>Technitude Tours & Travels</h3>
+        <p>Your trusted partner for safe, comfortable and reliable journeys.</p>
+        <p>© 2026 Technitude Tours & Travels. All Rights Reserved.</p>
+    </footer>
+
+    <!-- =====================================================
+         JAVASCRIPT LOGIC
+    ===================================================== -->
+    <script>
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('fullName').value;
+            alert("Thank you, " + name + "! Your message has been sent successfully. Our support team will get back to you shortly.");
+            document.getElementById('contactForm').reset();
+        }
+
+        function openWhatsApp() {
+            window.open("https://wa.me/919999999999", "_blank");
+        }
+    </script>
+
+</body>
+</html>
