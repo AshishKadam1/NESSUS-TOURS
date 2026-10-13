@@ -12,3 +12,25 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_reference VARCHAR(20) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
+    bus_id INT NOT NULL,
+    journey_date DATE NOT NULL,
+    seats_booked INT NOT NULL DEFAULT 1,
+    total_amount DECIMAL(10,2) NOT NULL,
+    booking_status ENUM(
+        'CONFIRMED',
+        'CANCELLED'
+    ) DEFAULT 'CONFIRMED',
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (bus_id) REFERENCES buses(id),
+
+    CHECK (seats_booked > 0),
+    CHECK (total_amount >= 0)
+);
