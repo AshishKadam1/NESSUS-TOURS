@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Available Buses - Technitude Tours & Travels</title>
+
+    <style>
+
+        :root {
+            --primary: #087e8b;
+            --primary-dark: #065a63;
+            --secondary: #0b4f6c;
+            --accent: #00a9c7;
+            --dark: #172f3d;
+            --text: #263943;
+            --light: #f5f9fa;
+            --white: #ffffff;
+            --border: #d8e4e8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--light);
+            color: var(--text);
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+
+            padding: 16px 6%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* MAIN */
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+
+            margin: 35px auto 60px;
+        }
+
+        .back {
+            display: inline-block;
+
+            margin-bottom: 20px;
+
+            color: var(--primary-dark);
+
+            text-decoration: none;
+
+            font-weight: 700;
+        }
+
+        /* ROUTE */
+
+        .route-box {
+            background: var(--white);
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            margin-bottom: 25px;
+
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .route {
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+        .route strong {
+            font-size: 22px;
+
+            color: var(--dark);
+        }
+
+        .arrow {
+            color: var(--primary);
+
+            font-size: 25px;
+
+            font-weight: bold;
+        }
+
+        .date {
+            margin-top: 8px;
+
+            color: #667780;
+        }
+
+        /* TITLE */
+
+        h1 {
+            margin-bottom: 20px;
+
+            color: var(--dark);
+        }
+
+        /* BUS LIST */
+
+        #busList {
+            display: grid;
+
+            gap: 18px;
+        }
+
+        /* BUS CARD */
+
+        .bus-card {
+            background: var(--white);
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            padding: 22px;
+
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .bus-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            gap: 20px;
+        }
+
+        .bus-name {
+            color: var(--secondary);
+
+            font-size: 20px;
+
+            font-weight: 800;
+        }
+
+        .bus-number {
+            margin-top: 6px;
+
+            color: #657780;
+        }
+
+        .bus-type {
+            margin-top: 6px;
+
+            color: #657780;
+        }
+
+        /* TIME */
+
+        .times {
+            display: flex;
+
+            align-items: center;
+
+            gap: 25px;
+
+            margin: 22px 0;
+        }
+
+        .time-block strong {
+            display: block;
+
+            font-size: 23px;
+
+            color: var(--dark);
+        }
+
+        .time-block span {
+            color: #667780;
+
+            font-size: 14px;
+        }
+
+        .duration {
+            color: var(--primary);
+
+            font-weight: 700;
+        }
+
+        /* BOTTOM */
+
+        .bus-bottom {
+            border-top: 1px solid var(--border);
+
+            padding-top: 18px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+        .price {
+            font-size: 24px;
+
+            font-weight: 800;
+
+            color: var(--dark);
+        }
+
+        .seats {
+            color: #28733e;
+
+            font-weight: 700;
+
+            margin-top: 4px;
+        }
+
+        /* BUTTON */
+
+        .seat-btn {
+            border: none;
+
+            background: var(--primary);
+
+            color: white;
+
+            padding: 12px 22px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            font-size: 15px;
+        }
+
+        .seat-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* MESSAGE */
+
+        .message {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 35px;
+
+            text-align: center;
+
+            color: #657780;
+        }
+
+        .message h3 {
+            color: var(--dark);
+
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+
+            padding: 40px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            .nav-links {
+                display: none;
+            }
+
+            .bus-top {
+                flex-direction: column;
+            }
+
+            .times {
+                gap: 12px;
+            }
+
+            .bus-bottom {
+                align-items: flex-start;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <a href="home.html" class="logo">
+            Technitude Tours & Travels
+        </a>
+
+        <div class="nav-links">
+
+            <a href="home.html">
+                Home
+            </a>
+
+            <a href="bookings.html">
+                My Bookings
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+            <a href="login.html">
+                Login
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+        <a href="home.html" class="back">
+            ← Back to Search
+        </a>
+
+
+        <!-- ROUTE -->
+
+        <div class="route-box">
+
+            <div class="route">
+
+                <strong id="fromCity">
+                    -
+                </strong>
+
+                <span class="arrow">
+                    →
+                </span>
+
+                <strong id="toCity">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="date">
+
+                Journey Date:
+
+                <strong id="journeyDate">
+                    -
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <h1>
+            Available Technitude Buses
+        </h1>
+
+
+        <!-- BUS RESULTS -->
+
+        <div id="busList">
+
+            <div class="loading">
+                Loading buses...
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        /* GET SEARCH PARAMETERS */
+
+        const params =
+            new URLSearchParams(window.location.search);
+
+
+        const from =
+            params.get("from");
+
+        const to =
+            params.get("to");
+
+        const date =
+            params.get("date");
+
+
+        /* DISPLAY ROUTE */
+
+        document.getElementById("fromCity").textContent =
+            from || "-";
+
+        document.getElementById("toCity").textContent =
+            to || "-";
+
+
+        /* DISPLAY DATE */
+
+        if (date) {
+
+            const d =
+                new Date(date + "T00:00:00");
+
+            document.getElementById("journeyDate")
+                .textContent =
+                d.toLocaleDateString(
+                    "en-IN",
+                    {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                    }
+                );
+        }
+
+
+        const busList =
+            document.getElementById("busList");
+
+
+        /* CHECK SEARCH */
+
+        if (!from || !to || !date) {
+
+            busList.innerHTML = `
+
+                <div class="message">
+
+                    <h3>
+                        Invalid Search
+                    </h3>
+
+                    <p>
+                        Please go back and select
+                        From, To and Journey Date.
+                    </p>
+
+                </div>
+
+            `;
+
+        } else {
+
+
+            /* CALL NODE.JS API */
+
+            fetch(
+                "/api/buses?from=" +
+                encodeURIComponent(from) +
+
+                "&to=" +
+                encodeURIComponent(to) +
+
+                "&date=" +
+                encodeURIComponent(date)
+            )
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server error"
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+            .then(buses => {
+
+
+                /* NO BUS */
+
+                if (
+                    !Array.isArray(buses) ||
+                    buses.length === 0
+                ) {
+
+                    busList.innerHTML = `
+
+                        <div class="message">
+
+                            <h3>
+                                No Technitude buses available
+                            </h3>
+
+                            <p>
+                                No bus is available
+                                for the selected route
+                                and date.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                /* CLEAR LOADING */
+
+                busList.innerHTML = "";
+
+window.availableBuses = buses;
+                /* CREATE BUS CARDS */
+
+                buses.forEach(bus => {
+
+                    const card =
+                        document.createElement("div");
+
+                    card.className =
+                        "bus-card";
+
+
+                    card.innerHTML = `
+
+                        <div class="bus-top">
+
+                            <div>
+
+                                <div class="bus-name">
+
+                                    ${escapeHtml(
+                                        bus.bus_name
+                                    )}
+
+                                </div>
+
+
+                                <div class="bus-number">
+
+                                    Bus No:
+                                    ${escapeHtml(
+                                        bus.bus_number || "-"
+                                    )}
+
+                                </div>
+
+
+                                <div class="bus-type">
+
+                                    ${escapeHtml(
+                                        bus.bus_type || "-"
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="times">
+
+
+                            <div class="time-block">
+
+                                <strong>
+
+                                    ${formatTime(
+                                        bus.departure_time
+                                    )}
+
+                                </strong>
+
+                                <span>
+
+                                    ${escapeHtml(
+                                        bus.from_city
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="duration">
+
+                                →
+
+                            </div>
+
+
+                            <div class="time-block">
+
+                                <strong>
+
+                                    ${formatTime(
+                                        bus.arrival_time
+                                    )}
+
+                                </strong>
+
+                                <span>
+
+                                    ${escapeHtml(
+                                        bus.to_city
+                                    )}
+
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="bus-bottom">
+
+
+                            <div>
+
+                                <div class="price">
+
+                                    ₹${Number(
+                                        bus.price
+                                    ).toFixed(0)}
+
+                                </div>
+
+
+                                <div class="seats">
+
+                                    ${bus.total_seats}
+                                    seats
+
+                                </div>
+
+                            </div>
+
+
+                            <button
+                                class="seat-btn"
+                                onclick="viewSeats(${bus.id})">
+
+                                View Seats
+
+                            </button>
+
+
+                        </div>
+
+                    `;
+
+
+                    busList.appendChild(card);
+
+                });
+
+            })
+
+
+            /* ERROR */
+
+            .catch(error => {
+
+                console.error(error);
+
+
+                busList.innerHTML = `
+
+                    <div class="message">
+
+                        <h3>
+                            Unable to load buses
+                        </h3>
+
+                        <p>
+                            Please start the Node.js
+                            backend and try again.
+                        </p>
+
+                        <p style="margin-top:8px;">
+
+                            Server:
+                            http://localhost:3000
+
+                        </p>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+
+        /* VIEW SEATS */
+
+ 
+/* VIEW SEATS */
+function viewSeats(busId) {
+    const selectedBus = window.availableBuses?.find(
+        bus => String(bus.id) === String(busId)
+    );
+
+    if (!selectedBus) {
+        console.error("Bus not found:", busId);
+        alert("Bus details not found. Please refresh and try again.");
+        return;
+    }
+
+    const params = new URLSearchParams({
+        bus_id: selectedBus.id,
+        bus_name: selectedBus.bus_name || "",
+        bus_type: selectedBus.bus_type || "",
+        from: selectedBus.from_city || from || "",
+        to: selectedBus.to_city || to || "",
+        date: selectedBus.journey_date || date || "",
+        price: selectedBus.price || 0,
+        total_seats: selectedBus.total_seats || 30
+    });
+
+    window.location.href =
+        "seat-selection.html?" + params.toString();
+}
+
+        /* FORMAT TIME */
+
+        function formatTime(time) {
+
+            if (!time) {
+
+                return "-";
+
+            }
+
+
+            const parts =
+                String(time).split(":");
+
+
+            let hour =
+                Number(parts[0]);
+
+
+            const minute =
+                parts[1] || "00";
+
+
+            const ampm =
+                hour >= 12
+                    ? "PM"
+                    : "AM";
+
+
+            hour =
+                hour % 12 || 12;
+
+
+            return (
+                hour +
+                ":" +
+                minute +
+                " " +
+                ampm
+            );
+
+        }
+
+
+        /* SECURITY */
+
+        function escapeHtml(value) {
+
+            return String(value)
+
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
+
+        }
+
+    </script>
+
+</body>
+
+</html>
