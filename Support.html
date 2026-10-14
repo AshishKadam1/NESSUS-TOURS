@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Staff Dashboard - Technitude Tours & Travels</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        :root {
+            --primary: #087e8b;
+            --primary-dark: #065a63;
+            --secondary: #0b4f6c;
+            --dark: #172f3d;
+            --text: #263943;
+            --light: #f5f9fa;
+            --border: #d8e4e8;
+        }
+        body { background: var(--light); color: var(--text); display: flex; min-height: 100vh; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--dark); color: white; padding: 25px; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; color: #00b4d8; }
+        .sidebar a { color: #c6d8dd; text-decoration: none; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; display: block; font-weight: 600; transition: 0.2s; cursor: pointer; }
+        .sidebar a:hover, .sidebar a.active { background: var(--primary); color: white; }
+        .sidebar .logout { margin-top: auto; background: #e74c3c; color: white; text-align: center; }
+
+        /* MAIN CONTENT */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+        h3 { color: var(--secondary); margin-bottom: 15px; font-size: 22px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid var(--border); text-align: left; font-size: 14px; }
+        th { background: var(--primary); color: white; }
+        
+        .badge-pending { background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-resolved { background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-cancelled { background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        
+        .btn-action { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        
+        .search-box-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box-row input, .search-box-row select { padding: 10px; border: 1px solid var(--border); border-radius: 8px; flex: 1; }
+        /* Chat Modal Styling */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 550px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { background: var(--secondary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; background: #f8fafb; display: flex; flex-direction: column; gap: 10px; }
+        .modal-footer { padding: 15px 20px; background: white; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .modal-footer input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; }
+        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.4; }
+        .chat-bubble.support { background: var(--primary); color: white; align-self: flex-end; }
+        .chat-bubble.customer { background: #e2e8f0; color: var(--text); align-self: flex-start; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <h2>Technitude Support</h2>
+        <a onclick="switchTab('inboxTab', this)" class="active">📥 Contact Inbox</a>
+        <a onclick="switchTab('busesTab', this)">🚌 View Buses</a>
+        <a onclick="switchTab('refundsTab', this)">💸 Cancellation & Refund</a>
+        <a onclick="switchTab('bookingsTab', this)">📋 Manage Bookings</a>
+        <a onclick="logout()" class="logout">Logout</a>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="main-content">
+
+        <!-- TAB 1: CONTACT INBOX -->
+        <div id="inboxTab" class="tab-content active">
+            <div class="card">
+                <h3>Customer Inquiries Inbox</h3>
+                <p style="color: #62747c; margin-bottom: 20px; font-size: 14px;">Review messages sent by users from the contact page.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sender</th>
+                            <th>Contact</th>
+                            <th>Subject & Message</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messageTableBody">
+                        <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: VIEW BUSES -->
+        <div id="busesTab" class="tab-content">
+            <div class="card">
+                <h3>Bus Schedules Lookup</h3>
+                <p style="color: #62747c; margin-bottom: 20px; font-size: 14px;">Look up active bus routes to assist customers over phone or chat.</p>
+                
+                <div class="search-box-row">
+                    <select id="searchFrom">
+                        <option value="">From City</option>
+                        <option value="Kolhapur">Kolhapur</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Mumbai">Mumbai</option>
+                    </select>
+                    <select id="searchTo">
+                        <option value="">To City</option>
+                        <option value="Kolhapur">Kolhapur</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Mumbai">Mumbai</option>
+                    </select>
+                    <input type="date" id="searchDate">
+                    <button class="btn-action" onclick="searchBuses()">Search</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bus Name</th>
+                            <th>Type</th>
+                            <th>Route</th>
+                            <th>Date & Time</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="busTableBody">
+                        <tr><td colspan="5" style="text-align: center;">Select filters to view buses.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: CANCELLATION & REFUND -->
+        <div id="refundsTab" class="tab-content">
+            <div class="card">
+                <h3>Cancellation & Refund Requests</h3>
+                <p style="color: #62747c; margin-bottom: 20px; font-size: 14px;">Process ticket cancellations and issue refunds for customers.</p>
+                
+                <div class="search-box-row">
+                    <input type="text" id="bookingIdInput" placeholder="Enter Booking ID or User Email...">
+                    <button class="btn-action" onclick="searchBookingForRefund()">Find Booking</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Route / Date</th>
+                            <th>Amount Paid</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="refundTableBody">
+                        <tr><td colspan="6" style="text-align: center;">Search for a booking or view recent requests.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 4: MANAGE BOOKINGS -->
+        <div id="bookingsTab" class="tab-content">
+            <div class="card">
+                <h3>Customer Bookings Lookup</h3>
+                <p style="color: #62747c; font-size: 14px;">Support staff can view user itineraries here.</p>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    // Tab Switching Logic
+    function switchTab(tabId, element) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    // 1. Clean up ISO Date (e.g., "2026-10-29T18:30:00.000Z" -> "29 Oct 2026")
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-IN', options);
+    }
+
+    // 2. Clean up Time by removing seconds (e.g., "21:30:00" -> "21:30")
+    function formatTime(timeString) {
+        if (!timeString) return '';
+        const parts = timeString.split(':');
+        if (parts.length >= 2) {
+            return `${parts[0]}:${parts[1]}`;
+        }
+        return timeString;
+    }
+
+    // Load Contact Messages
+    async function loadMessages() {
+        try {
+            const res = await fetch('/api/support/messages');
+            const messages = await res.json();
+            const tbody = document.getElementById('messageTableBody');
+            tbody.innerHTML = '';
+            
+            if (messages.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No messages found.</td></tr>`;
+                return;
+            }
+            
+            messages.forEach(msg => {
+                const statusBadge = msg.status === 'RESOLVED' 
+                    ? `<span class="badge-resolved">RESOLVED</span>` 
+                    : `<span class="badge-pending">PENDING</span>`;
+                
+                const actionBtn = msg.status === 'RESOLVED' 
+                    ? 'Done' 
+                    : `<button class="btn-action" onclick="markResolved(${msg.id})">Resolve</button>`;
+
+                const formattedDate = formatDate(msg.created_at);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td><b>${msg.full_name}</b></td>
+                        <td>${msg.email}<br>${msg.phone || 'N/A'}</td>
+                        <td><b>[${msg.subject}]</b><br>${msg.message}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn-chat" onclick="openChat(${msg.id}, '${msg.full_name}')" style="background:var(--secondary); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-right:5px;">Chat</button>
+                            ${actionBtn}
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
+    }
+
+    async function markResolved(id) {
+        await fetch(`/api/support/messages/${id}/resolve`, { method: 'PATCH' });
+        loadMessages();
+    }
+
+    // Search Buses
+    async function searchBuses() {
+        const from = document.getElementById('searchFrom').value;
+        const to = document.getElementById('searchTo').value;
+        const date = document.getElementById('searchDate').value;
+
+        if (!from || !to || !date) {
+            alert('Please fill out all search filters');
+            return;
+        }
+
+        const res = await fetch(`/api/buses?from=${from}&to=${to}&date=${date}`);
+        const buses = await res.json();
+        const tbody = document.getElementById('busTableBody');
+        tbody.innerHTML = '';
+
+        if (buses.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No buses available for this route.</td></tr>`;
+            return;
+        }
+
+        buses.forEach(bus => {
+            const journeyDate = formatDate(bus.journey_date);
+            const depTime = formatTime(bus.departure_time);
+            const arrTime = formatTime(bus.arrival_time);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${bus.bus_name}</b><br><small>${bus.bus_number}</small></td>
+                    <td>${bus.bus_type}</td>
+                    <td>${bus.from_city} ➔ ${bus.to_city}</td>
+                    <td>${journeyDate}<br>${depTime} - ${arrTime}</td>
+                    <td>₹${bus.price}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Chat Functionality (Using Single Table Thread API)
+    let currentMessageId = null;
+
+    async function openChat(messageId, customerName) {
+        currentMessageId = messageId;
+        document.getElementById('chatModalTitle').textContent = `Chat: ${customerName}`;
+        document.getElementById('chatModal').style.display = 'flex';
+        
+        const container = document.getElementById('chatMessagesContainer');
+        container.innerHTML = 'Loading conversation...';
+
+        try {
+            const res = await fetch(`/api/support/messages/${messageId}/thread`);
+            const thread = await res.json();
+            
+            container.innerHTML = '';
+            thread.forEach(item => {
+                const bubbleClass = item.sender_type === 'SUPPORT' ? 'support' : 'customer';
+                const senderLabel = item.sender_type === 'SUPPORT' ? 'Support Team' : item.full_name;
+                container.innerHTML += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        <b>${senderLabel}:</b><br>${item.message}
+                    </div>
+                `;
+            });
+            container.scrollTop = container.scrollHeight;
+        } catch (error) {
+            console.error('Error loading chat thread:', error);
+            container.innerHTML = 'Error loading messages.';
+        }
+    }
+
+    function closeChatModal() {
+        document.getElementById('chatModal').style.display = 'none';
+        currentMessageId = null;
+    }
+
+    function handleChatKeyPress(e) {
+        if (e.key === 'Enter') {
+            sendReply();
+        }
+    }
+
+    async function sendReply() {
+        const input = document.getElementById('replyInput');
+        const text = input.value.trim();
+        if (!text || !currentMessageId) return;
+
+        try {
+            const res = await fetch(`/api/support/messages/${currentMessageId}/reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reply_text: text, sender_name: 'Support Team' })
+            });
+
+            if (res.ok) {
+                input.value = '';
+                const customerName = document.getElementById('chatModalTitle').textContent.replace('Chat: ', '');
+                openChat(currentMessageId, customerName);
+            } else {
+                alert('Failed to send reply.');
+            }
+        } catch (error) {
+            console.error('Error sending reply:', error);
+        }
+    }
+
+    // Placeholder for Refund Search & Processing
+    function searchBookingForRefund() {
+        const query = document.getElementById('bookingIdInput').value;
+        if (!query) {
+            alert('Please enter a booking ID or email');
+            return;
+        }
+        
+        const tbody = document.getElementById('refundTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td>#BK-${query}</td>
+                <td>Sample Customer</td>
+                <td>Pune ➔ Mumbai<br>20 Oct 2026</td>
+                <td>₹750</td>
+                <td><span class="badge-pending">CONFIRMED</span></td>
+                <td>
+                    <button class="btn-action" onclick="alert('Booking Cancelled')">Cancel</button>
+                    <button class="btn-danger" onclick="alert('Refund Processed Successfully')">Refund</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'home.html';
+    }
+
+    loadMessages();
+</script>
+<!-- Chat Modal -->
+<div id="chatModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="chatModalTitle" style="color:white; font-size:18px;">Chat with Customer</h3>
+            <button onclick="closeChatModal()" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">&times;</button>
+        </div>
+        <div class="modal-body" id="chatMessagesContainer">
+            <!-- Messages load here -->
+        </div>
+        <div class="modal-footer">
+            <input type="text" id="replyInput" placeholder="Type your reply..." onkeypress="handleChatKeyPress(event)">
+            <button class="btn-action" onclick="sendReply()">Send</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
