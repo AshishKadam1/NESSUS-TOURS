@@ -1144,10 +1144,10 @@
 
                         }
 
-                        else if (data.user.role === 'SUPPORT') {
+                        else if (data.user.role === 'SUPPORT'|| data.user.role === 'ADMIN') {
 
                             window.location.href =
-                                'support-dashboard.html';
+                                'support.html';
 
                         }
 
@@ -1392,7 +1392,7 @@
             return mobileRegex.test(input);
 
         }
-
+        
 
     </script>
 
