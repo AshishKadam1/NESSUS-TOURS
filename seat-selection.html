@@ -404,7 +404,11 @@ const busId = params.get("bus_id") || params.get("id") || "";
 const busName = params.get("bus_name") || params.get("name") || "Nessus Express";
 const from = params.get("from") || params.get("from_city") || "";
 const to = params.get("to") || params.get("to_city") || "";
-const journeyDate = params.get("date") || params.get("journey_date") || "";
+const rawDate = params.get("date") || params.get("journey_date") || "";
+const journeyDate = rawDate.slice(0, 10);
+
+console.log("Received URL date:", rawDate);
+console.log("Final journey date:", journeyDate);
 const busType = params.get("bus_type") || params.get("type") || "Bus";
 
 const rawPrice = Number(params.get("price"));
