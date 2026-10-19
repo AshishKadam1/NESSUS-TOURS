@@ -327,14 +327,20 @@ footer {
 </footer>
 
 <script>
+
 const params = new URLSearchParams(window.location.search);
+
+const rawDate = params.get("date") || "";
+
+// Convert ISO date to MySQL DATE format: YYYY-MM-DD
+const journeyDate = rawDate.substring(0, 10);
 
 const booking = {
   busId: params.get("bus_id") || "",
   busName: params.get("bus_name") || "Bus",
   from: params.get("from") || "",
   to: params.get("to") || "",
-  date: params.get("date") || "",
+  date: journeyDate,
   seats: (params.get("seats") || "")
     .split(",")
     .map(s => s.trim())
