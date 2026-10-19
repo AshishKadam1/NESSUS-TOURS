@@ -186,6 +186,69 @@
             background: var(--primary-dark) !important;
         }
 
+        /* User Avatar & Logout */
+        .user-avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            background: var(--primary-dark);
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            width: 160px;
+            padding: 8px 0;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .user-dropdown button:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
         /* ================= HERO ================= */
 
         .hero {
@@ -1024,7 +1087,7 @@
                 </li>
 
                 <li>
-                    <a href="bookings.html">
+                    <a href="manage-booking.html">
                         Manage Bookings
                     </a>
                 </li>
@@ -1042,7 +1105,7 @@
 </li>
 
 
-                <li>
+                <li id="navLoginItem">
                     <a href="login.html" class="login-button">
                         Login
                     </a>
@@ -2027,12 +2090,10 @@
                     try {
 
                         /* NODE.JS API */
-
-                        const response = await fetch(
-                            `/api/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(journey)}`
-                        );
-
-
+                        const dateInput = document.querySelector( 'input[type="date"]' );
+                        const date = dateInput ? dateInput.value : '';
+                        if (!date) { results.innerHTML = ` <div class="no-buses"> <h3>Select Journey Date</h3> <p>Please select your journey date.</p> </div> `; return; }
+                        const response = await fetch( `http://localhost:3000/api/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}` );
                         const buses =
                             await response.json();
 
@@ -2329,6 +2390,66 @@ function bookBus(busId) {
 
         }
 
+
+        /* ================= CHECK AUTH STATE & DISPLAY AVATAR / LOGOUT ================= */
+        function checkAuthState() {
+            const userJson = localStorage.getItem('loggedInUser');
+            const navLoginItem = document.getElementById('navLoginItem');
+            if (!navLoginItem) return;
+
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    const name = user.full_name || user.email || 'U';
+                    // Get initials (up to 2 characters)
+                    const parts = name.trim().split(' ');
+                    let initials = '';
+                    if (parts.length >= 2) {
+                        initials = (parts[0][0] + parts[1][0]).toUpperCase();
+                    } else {
+                        initials = name.substring(0, 2).toUpperCase();
+                    }
+
+                    navLoginItem.innerHTML = `
+                        <div class="user-avatar-container">
+                            <div class="user-avatar" onclick="toggleUserDropdown(event)" title="${name}">
+                                ${initials}
+                            </div>
+                            <div class="user-dropdown" id="userDropdown">
+                                <button onclick="handleLogout()">Logout</button>
+                            </div>
+                        </div>
+                    `;
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+        }
+
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        window.addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function handleLogout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.reload();
+        }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', checkAuthState);
+        // Also run immediately in case DOM is already loaded
+        checkAuthState();
 
         /* ================= WHATSAPP ================= */
 
