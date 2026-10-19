@@ -447,6 +447,46 @@ app.put('/api/operator/buses/:id', verifyOperator, async (req, res) => {
     }
 });
 
+// Update Bus Fleet Details & Price (Bus Management)
+app.put('/api/operator/buses/:id/fleet', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+        const { bus_name, bus_number, bus_type, total_seats, price } = req.body;
+
+        await pool.query(
+            `UPDATE buses 
+             SET bus_name = ?, bus_number = ?, bus_type = ?, total_seats = ?, price = ? 
+             WHERE id = ? AND operator_id = ?`,
+            [bus_name, bus_number, bus_type, total_seats, price, busId, operatorId]
+        );
+        res.json({ success: true, message: 'Bus fleet details and price updated successfully' });
+    } catch (error) {
+        console.error('Error updating bus fleet:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Update Route & Schedule Details Only (Routes & Schedules)
+app.put('/api/operator/buses/:id/route', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+        const { from_city, to_city, journey_date, departure_time, arrival_time, price } = req.body;
+
+        await pool.query(
+            `UPDATE buses 
+             SET from_city = ?, to_city = ?, journey_date = ?, departure_time = ?, arrival_time = ?, price = ? 
+             WHERE id = ? AND operator_id = ?`,
+            [from_city, to_city, journey_date, departure_time, arrival_time, price, busId, operatorId]
+        );
+        res.json({ success: true, message: 'Route schedule updated successfully' });
+    } catch (error) {
+        console.error('Error updating route schedule:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 // Start server 
 app.listen(PORT, () => { 
     console.log(`Technitude Travels server running at http://localhost:${PORT}`); 
