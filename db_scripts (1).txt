@@ -1,17 +1,135 @@
-User table:
-
-CREATE DATABASE Travels;
-
+CREATE DATABASE IF NOT EXISTS Travels;
+USE Travels;
+SHOW TABLES;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE DEFAULT NULL, -- Changed from NOT NULL to DEFAULT NULL
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('CUSTOMER', 'AGENT', 'OPERATOR', 'SUPPORT', 'ADMIN') DEFAULT 'CUSTOMER',
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+SELECT * FROM users;
+DELETE FROM users WHERE id = 6;
+
+CREATE TABLE buses (
+    id INT NOT NULL AUTO_INCREMENT,
+    bus_name VARCHAR(100) NOT NULL,
+    bus_number VARCHAR(50) DEFAULT NULL,
+    bus_type VARCHAR(50) DEFAULT NULL,
+    from_city VARCHAR(100) NOT NULL,
+    to_city VARCHAR(100) NOT NULL,
+    journey_date DATE NOT NULL,
+    departure_time TIME NOT NULL,
+    arrival_time TIME NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    total_seats INT NOT NULL,
+    PRIMARY KEY (id)
+);
+
+INSERT INTO buses (
+    id,
+    bus_name,
+    bus_number,
+    bus_type,
+    from_city,
+    to_city,
+    journey_date,
+    departure_time,
+    arrival_time,
+    price,
+    total_seats
+)
+VALUES
+(1, 'Technitude Express', 'MH09TT1001', 'AC Sleeper',
+ 'Kolhapur', 'Pune', '2026-10-10', '08:00:00', '14:00:00', 650.00, 40),
+(2, 'Technitude Travels', 'MH12TT1002', 'AC Seater',
+ 'Kolhapur', 'Pune', '2026-10-10', '10:30:00', '16:30:00', 550.00, 40),
+(3, 'Technitude Express', 'MH12TT1003', 'AC Seater',
+ 'Pune', 'Mumbai', '2026-10-10', '07:00:00', '11:00:00', 500.00, 40),
+(4, 'Technitude Travels', 'MH12TT1004', 'AC Sleeper',
+ 'Pune', 'Mumbai', '2026-10-10', '21:30:00', '01:30:00', 399.00, 40);
+ 
+ SELECT * FROM buses;
+USE Travels;
+
+INSERT INTO buses
+(bus_name, bus_number, bus_type, from_city, to_city,
+ journey_date, departure_time, arrival_time, price, total_seats)
+VALUES
+-- 15 October
+('Technitude Express', 'MH09TT1015', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-15', '08:00:00', '14:00:00', 650.00, 40),
+('Technitude Travels', 'MH12TT1016', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-15', '10:30:00', '16:30:00', 550.00, 40),
+('Technitude Express', 'MH12TT1017', 'AC Seater', 'Pune', 'Mumbai', '2026-10-15', '07:00:00', '11:00:00', 500.00, 40),
+
+-- 16 October
+('Technitude Travels', 'MH14TT1018', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-16', '21:30:00', '01:30:00', 399.00, 40),
+('Technitude Express', 'MH09TT1019', 'Non-AC Seater', 'Pune', 'Kolhapur', '2026-10-16', '06:30:00', '13:00:00', 450.00, 40),
+('Technitude Travels', 'MH12TT1020', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-16', '22:00:00', '02:30:00', 700.00, 40),
+
+-- 17 October
+('Technitude Express', 'MH14TT1021', 'AC Seater', 'Kolhapur', 'Mumbai', '2026-10-17', '09:00:00', '18:00:00', 800.00, 40),
+('Technitude Travels', 'MH09TT1022', 'AC Sleeper', 'Mumbai', 'Kolhapur', '2026-10-17', '20:30:00', '05:00:00', 850.00, 40),
+('Technitude Express', 'MH12TT1023', 'Non-AC Seater', 'Pune', 'Mumbai', '2026-10-17', '12:00:00', '16:30:00', 350.00, 40),
+
+-- 18 October
+('Technitude Travels', 'MH14TT1024', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-18', '22:00:00', '05:00:00', 750.00, 40),
+('Technitude Express', 'MH09TT1025', 'AC Seater', 'Pune', 'Kolhapur', '2026-10-18', '07:30:00', '14:00:00', 600.00, 40),
+('Technitude Travels', 'MH12TT1026', 'AC Seater', 'Mumbai', 'Pune', '2026-10-18', '15:00:00', '19:30:00', 450.00, 40),
+
+-- 19 October
+('Technitude Express', 'MH14TT1027', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-19', '21:00:00', '01:00:00', 650.00, 40),
+('Technitude Travels', 'MH09TT1028', 'Non-AC Seater', 'Kolhapur', 'Pune', '2026-10-19', '06:00:00', '12:30:00', 400.00, 40),
+
+-- 20 October
+('Technitude Express', 'MH12TT1029', 'AC Seater', 'Pune', 'Mumbai', '2026-10-20', '08:30:00', '13:00:00', 500.00, 40),
+('Technitude Travels', 'MH14TT1030', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-20', '22:30:00', '03:00:00', 699.00, 40),
+('Technitude Express', 'MH09TT1031', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-10-20', '20:00:00', '05:00:00', 900.00, 40),
+
+-- 21 October
+('Technitude Travels', 'MH12TT1032', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-21', '11:00:00', '17:00:00', 575.00, 40),
+('Technitude Express', 'MH14TT1033', 'Non-AC Seater', 'Mumbai', 'Pune', '2026-10-21', '06:00:00', '10:30:00', 300.00, 40),
+
+-- 22 October
+('Technitude Travels', 'MH09TT1034', 'AC Sleeper', 'Pune', 'Kolhapur', '2026-10-22', '21:30:00', '04:30:00', 700.00, 40),
+('Technitude Express', 'MH12TT1035', 'AC Seater', 'Mumbai', 'Kolhapur', '2026-10-22', '07:00:00', '16:00:00', 750.00, 40),
+('Technitude Travels', 'MH14TT1036', 'AC Seater', 'Pune', 'Mumbai', '2026-10-22', '14:00:00', '18:30:00', 475.00, 40),
+
+-- 23 October
+('Technitude Express', 'MH09TT1037', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-23', '21:00:00', '01:30:00', 650.00, 40),
+('Technitude Travels', 'MH12TT1038', 'Non-AC Seater', 'Kolhapur', 'Mumbai', '2026-10-23', '08:00:00', '17:00:00', 600.00, 40),
+
+-- 24 October
+('Technitude Express', 'MH14TT1039', 'AC Seater', 'Pune', 'Kolhapur', '2026-10-24', '09:00:00', '15:30:00', 550.00, 40),
+('Technitude Travels', 'MH09TT1040', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-24', '21:00:00', '04:00:00', 700.00, 40),
+('Technitude Express', 'MH12TT1041', 'AC Seater', 'Mumbai', 'Pune', '2026-10-24', '13:00:00', '17:30:00', 475.00, 40),
+
+-- 25 October
+('Technitude Travels', 'MH14TT1042', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-25', '22:00:00', '02:00:00', 699.00, 40),
+('Technitude Express', 'MH09TT1043', 'Non-AC Seater', 'Pune', 'Kolhapur', '2026-10-25', '06:30:00', '13:00:00', 425.00, 40),
+
+-- 26 October
+('Technitude Travels', 'MH12TT1044', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-26', '07:00:00', '13:00:00', 525.00, 40),
+('Technitude Express', 'MH14TT1045', 'AC Sleeper', 'Mumbai', 'Kolhapur', '2026-10-26', '20:00:00', '05:00:00', 875.00, 40),
+('Technitude Travels', 'MH09TT1046', 'AC Seater', 'Pune', 'Mumbai', '2026-10-26', '16:00:00', '20:30:00', 500.00, 40),
+
+-- 27 October
+('Technitude Express', 'MH12TT1047', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-10-27', '21:30:00', '06:30:00', 899.00, 40),
+('Technitude Travels', 'MH14TT1048', 'Non-AC Seater', 'Mumbai', 'Pune', '2026-10-27', '08:00:00', '12:30:00', 325.00, 40),
+
+-- 28 October
+('Technitude Express', 'MH09TT1049', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-28', '12:00:00', '18:00:00', 575.00, 40),
+('Technitude Travels', 'MH12TT1050', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-28', '22:30:00', '02:30:00', 675.00, 40),
+
+-- 29 October
+('Technitude Express', 'MH14TT1051', 'AC Seater', 'Mumbai', 'Pune', '2026-10-29', '10:00:00', '14:30:00', 475.00, 40),
+('Technitude Travels', 'MH09TT1052', 'AC Sleeper', 'Pune', 'Kolhapur', '2026-10-29', '20:30:00', '03:30:00', 725.00, 40),
+
+-- 30 October
+('Technitude Express', 'MH12TT1053', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-30', '09:30:00', '15:30:00', 550.00, 40),
+('Technitude Travels', 'MH14TT1054', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-30', '21:30:00', '02:00:00', 699.00, 40);
 
 
 CREATE TABLE bookings (
@@ -34,3 +152,38 @@ CREATE TABLE bookings (
     CHECK (seats_booked > 0),
     CHECK (total_amount >= 0)
 );
+
+CREATE TABLE support_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT DEFAULT NULL,         -- NULL for the main inquiry, points to the main message ID for replies
+    full_name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    subject VARCHAR(255),
+    message TEXT NOT NULL,
+    sender_type ENUM('CUSTOMER', 'SUPPORT') DEFAULT 'CUSTOMER',
+    status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, RESOLVED
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES support_messages(id) ON DELETE CASCADE
+);
+SELECT * FROM support_messages;
+DELETE FROM support_messages;
+
+-- 1. Link buses to the operator who owns them
+ALTER TABLE buses 
+ADD COLUMN operator_id INT,
+ADD CONSTRAINT fk_buses_operator FOREIGN KEY (operator_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- 2. Link schedules to the operator
+ALTER TABLE bus_schedules 
+ADD COLUMN operator_id INT,
+ADD CONSTRAINT fk_schedules_operator FOREIGN KEY (operator_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- Assign all existing buses to your operator user (assuming operator user id = 1)
+UPDATE buses SET operator_id = 1 WHERE operator_id IS NULL;
+-- Check your user IDs and bus records first
+SELECT id, full_name, email, role FROM users WHERE role = 'OPERATOR';
+SELECT id, bus_name, operator_id FROM buses;
+
+-- Assign buses to your operator ID (e.g., operator id = 1)
+UPDATE buses SET operator_id = 1 WHERE operator_id IS NULL;
