@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Seats | Technitude Tours & Travels</title>
+
+<style>
+:root {
+    --ink: #243943;
+    --teal: #087e8b;
+    --teal-dark: #065a63;
+    --muted: #687980;
+    --line: #dce7ea;
+    --bg: #f4f8fa;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+}
+
+header {
+    background: white;
+    padding: 20px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px #0001;
+}
+
+header h2 {
+    color: var(--teal);
+}
+
+header a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 35px auto;
+    padding: 0 20px 30px;
+}
+
+h1 {
+    color: #0b4f6c;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+    margin-bottom: 22px;
+    font-size: 14px;
+}
+
+.bus-info, .card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 22px;
+}
+
+.bus-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.bus-info p {
+    margin-top: 8px;
+    color: var(--muted);
+}
+
+.price {
+    color: var(--teal);
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.card h2 {
+    color: #0b4f6c;
+    margin-bottom: 10px;
+}
+
+.legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    font-size: 13px;
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #b9d0d6;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.dot.available { background: white; }
+.dot.chosen { background: var(--teal); }
+.dot.booked { background: #dce3e6; }
+
+.driver {
+    max-width: 350px;
+    margin: auto auto 18px;
+    background: #edf5f6;
+    text-align: right;
+    padding: 14px;
+    border-radius: 8px;
+    color: #52656e;
+}
+
+.seat-map-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 5px 0 15px;
+}
+
+.seat-map {
+    display: grid;
+    grid-template-columns: repeat(2, 46px) 24px repeat(2, 46px);
+    gap: 10px 8px;
+    justify-content: center;
+    min-width: max-content;
+}
+
+.seat {
+    width: 46px;
+    height: 42px;
+    border: 1px solid #c7d5d8;
+    border-radius: 9px;
+    background: white;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.seat.available:hover {
+    border-color: var(--teal);
+    background: #e9fbfc;
+}
+
+.seat.selected {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+}
+
+.seat:focus-visible {
+    outline: 2px solid var(--teal-dark);
+    outline-offset: 2px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #edf1f2;
+}
+
+.summary-row span {
+    color: var(--muted);
+}
+
+.summary-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.total {
+    font-size: 21px;
+    color: var(--teal);
+}
+
+.coupon-box {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.coupon-box input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ccdadd;
+    border-radius: 7px;
+}
+
+button.apply {
+    padding: 12px 16px;
+    background: var(--teal);
+    border: none;
+    border-radius: 7px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#couponMessage {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.continue {
+    width: 100%;
+    margin-top: 22px;
+    padding: 15px;
+    border: none;
+    border-radius: 25px;
+    background: var(--teal);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.continue:disabled {
+    background: #a7b8bc;
+    cursor: not-allowed;
+}
+
+.note {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 18px;
+    line-height: 1.5;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: var(--muted);
+}
+
+@media(max-width: 750px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .card, .bus-info {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>TECHNITUDE TOURS</h2>
+    <a href="bus-results.html" onclick="
+        if (history.length > 1) {
+            history.back();
+            return false;
+        }
+    ">← Back to Buses</a>
+</header>
+
+<main class="container">
+
+    <h1>Select Your Seats</h1>
+    <p class="subtitle">
+        Choose seats and apply an available offer before booking.
+    </p>
+
+    <section class="bus-info">
+        <div>
+            <h2 id="busName">Your Bus</h2>
+            <p id="route">Route</p>
+            <p id="journeyDate">Journey date</p>
+            <p id="busType">Bus type</p>
+        </div>
+
+        <div>
+            <div class="price" id="priceDisplay">₹0</div>
+            <p>Per seat</p>
+        </div>
+    </section>
+
+    <div class="layout">
+
+        <section class="card">
+            <h2>Choose Your Seats</h2>
+            <p class="subtitle">Click a seat to select or deselect it.</p>
+
+            <div class="legend">
+                <span><i class="dot available"></i> Available</span>
+                <span><i class="dot chosen"></i> Selected</span>
+                <span><i class="dot booked"></i> Unavailable</span>
+            </div>
+
+            <div class="driver">FRONT OF BUS 🚌</div>
+            <div class="seat-map-wrap">
+                <div class="seat-map" id="seatMap"></div>
+            </div>
+
+            <p class="note">
+                All seats start as available in this demo.
+                Real booked-seat status requires database integration.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>Booking Summary</h2>
+            <p class="subtitle">Your fare updates when you select seats.</p>
+
+            <div class="summary-row">
+                <span>Route</span>
+                <strong id="summaryRoute">—</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Journey Date</span>
+                <strong id="summaryDate">—</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Selected Seats</span>
+                <strong id="selectedSeats">None</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Number of Seats</span>
+                <strong id="seatCount">0</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Base Fare</span>
+                <strong id="baseFare">₹0</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Discount</span>
+                <strong id="discountAmount" style="color:green">− ₹0</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Coupon Applied</span>
+                <strong id="appliedCoupon">None</strong>
+            </div>
+
+            <div class="summary-row total">
+                <span>Final Amount</span>
+                <strong id="totalFare">₹0</strong>
+            </div>
+
+            <label for="couponCode"><strong>Offer / Coupon Code</strong></label>
+
+            <div class="coupon-box">
+                <input id="couponCode" placeholder="Enter coupon code">
+                <button class="apply" type="button" id="applyCoupon">
+                    Apply
+                </button>
+            </div>
+
+            <p id="couponMessage" role="status"></p>
+
+            <button class="continue" id="continueBtn" disabled>
+                Continue to Booking →
+            </button>
+        </section>
+
+    </div>
+</main>
+
+<footer>
+    © 2026 Technitude Tours & Travels
+</footer>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+
+const busId = params.get("bus_id") || params.get("id") || "";
+const busName = params.get("bus_name") || params.get("name") || "Nessus Express";
+const from = params.get("from") || params.get("from_city") || "";
+const to = params.get("to") || params.get("to_city") || "";
+const rawDate = params.get("date") || params.get("journey_date") || "";
+const journeyDate = rawDate.slice(0, 10);
+
+console.log("Received URL date:", rawDate);
+console.log("Final journey date:", journeyDate);
+const busType = params.get("bus_type") || params.get("type") || "Bus";
+
+const rawPrice = Number(params.get("price"));
+const price = Number.isFinite(rawPrice) && rawPrice > 0
+    ? rawPrice
+    : 0;
+
+const rawSeatCount = Number(params.get("total_seats"));
+const totalSeats = Number.isInteger(rawSeatCount) && rawSeatCount > 0
+    ? Math.min(rawSeatCount, 40)
+    : 30;
+
+const selected = new Set();
+let appliedOffer = null;
+
+const offers = {
+    TECH250: { amount: 250, type: "bus" },
+    BUS300: { amount: 300, type: "bus" },
+    WEEKEND200: { amount: 200, type: "weekend" },
+    TECH500: { amount: 500, type: "payment" }
+};
+
+function money(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN");
+}
+
+document.getElementById("busName").textContent = busName;
+document.getElementById("route").textContent =
+    from && to ? `${from} → ${to}` : "Route not provided";
+
+document.getElementById("journeyDate").textContent =
+    journeyDate || "Journey date not provided";
+
+document.getElementById("busType").textContent = busType;
+document.getElementById("priceDisplay").textContent = money(price);
+
+document.getElementById("summaryRoute").textContent =
+    from && to ? `${from} → ${to}` : "—";
+
+document.getElementById("summaryDate").textContent = journeyDate || "—";
+
+const seatMap = document.getElementById("seatMap");
+
+function createSeat(number) {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "seat available";
+    button.textContent = number;
+    button.setAttribute("aria-label", `Seat ${number}`);
+    button.setAttribute("aria-pressed", "false");
+    button.style.gridColumn = [1, 2, 4, 5][(number - 1) % 4];
+    button.style.gridRow = Math.floor((number - 1) / 4) + 1;
+
+    button.addEventListener("click", () => {
+        if (selected.has(number)) {
+            selected.delete(number);
+        } else {
+            selected.add(number);
+        }
+
+        const isSelected = selected.has(number);
+
+        button.classList.toggle("selected", isSelected);
+        button.classList.toggle("available", !isSelected);
+        button.setAttribute("aria-pressed", String(isSelected));
+
+        updateSummary();
+    });
+
+    return button;
+}
+
+/* Two seats + aisle + two seats */
+for (let number = 1; number <= totalSeats; number++) {
+    seatMap.appendChild(createSeat(number));
+}
+
+function updateSummary() {
+    const seats = [...selected].sort((a, b) => a - b);
+    const baseFare = seats.length * price;
+
+    const discount = appliedOffer
+        ? Math.min(appliedOffer.amount, baseFare)
+        : 0;
+
+    const finalAmount = baseFare - discount;
+
+    document.getElementById("selectedSeats").textContent =
+        seats.length ? seats.join(", ") : "None";
+
+    document.getElementById("seatCount").textContent = seats.length;
+    document.getElementById("baseFare").textContent = money(baseFare);
+    document.getElementById("discountAmount").textContent = "− " + money(discount);
+
+    document.getElementById("appliedCoupon").textContent =
+        appliedOffer ? appliedOffer.code : "None";
+
+    document.getElementById("totalFare").textContent = money(finalAmount);
+
+    document.getElementById("continueBtn").disabled =
+        seats.length === 0 || price <= 0;
+}
+
+document.getElementById("applyCoupon").addEventListener("click", () => {
+    const code = document.getElementById("couponCode")
+        .value.trim().toUpperCase();
+
+    const message = document.getElementById("couponMessage");
+    const offer = offers[code];
+
+    if (!offer) {
+        appliedOffer = null;
+        message.style.color = "red";
+        message.textContent = "Invalid coupon code.";
+        updateSummary();
+        return;
+    }
+
+    if (offer.type === "weekend") {
+        if (!journeyDate) {
+            appliedOffer = null;
+            message.style.color = "red";
+            message.textContent = "Journey date is required for this offer.";
+            updateSummary();
+            return;
+        }
+
+        const day = new Date(journeyDate + "T12:00:00").getDay();
+
+        if (day !== 0 && day !== 6) {
+            appliedOffer = null;
+            message.style.color = "red";
+            message.textContent = "WEEKEND200 is valid only for weekend journeys.";
+            updateSummary();
+            return;
+        }
+    }
+
+    appliedOffer = { ...offer, code };
+
+    message.style.color = "green";
+    message.textContent = `${code} applied. Discount updated below.`;
+
+    updateSummary();
+});
+
+document.getElementById("continueBtn").addEventListener("click", () => {
+    if (selected.size === 0) return;
+
+    if (!busId) {
+        alert("Bus ID is missing. Please select the bus again.");
+        return;
+    }
+
+    if (price <= 0) {
+        alert("Bus price is missing. Please select the bus again.");
+        return;
+    }
+
+    const seats = [...selected].sort((a, b) => a - b);
+    const baseFare = seats.length * price;
+
+    const discount = appliedOffer
+        ? Math.min(appliedOffer.amount, baseFare)
+        : 0;
+
+    const finalAmount = baseFare - discount;
+
+    const query = new URLSearchParams({
+        bus_id: busId,
+        bus_name: busName,
+        from,
+        to,
+        date: journeyDate,
+        bus_type: busType,
+        price: String(price),
+        total_seats: String(totalSeats),
+        seats: seats.join(","),
+        base_fare: String(baseFare),
+        coupon_code: appliedOffer ? appliedOffer.code : "",
+        discount: String(discount),
+        total: String(finalAmount)
+    });
+
+    window.location.href = `booking.html?${query.toString()}`;
+});
+
+updateSummary();
+</script>
+
+</body>
+</html>

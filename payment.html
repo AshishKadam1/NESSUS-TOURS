@@ -1,0 +1,526 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallet Payment | Technitude Tours & Travels</title>
+
+<style>
+:root {
+  --primary: #087e8b;
+  --dark: #18343d;
+  --bg: #f3f7f9;
+  --border: #dce5e9;
+  --muted: #687980;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--dark);
+}
+
+header {
+  background: #fff;
+  padding: 18px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px #0000000b;
+}
+
+.logo {
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: bold;
+}
+
+header a,
+.back-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1050px;
+  margin: 30px auto;
+  padding: 0 18px;
+}
+
+.page-heading {
+  margin-bottom: 24px;
+}
+
+.page-heading h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.page-heading p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.card {
+  background: #fff;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.wallet-box {
+  background: #eaf8f8;
+  border: 1px solid #cce9eb;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+
+.wallet-label {
+  color: #47656b;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.wallet-balance {
+  color: var(--primary);
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.wallet-caption {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf1f3;
+  line-height: 1.5;
+}
+
+.detail-row span {
+  color: var(--muted);
+}
+
+.detail-row strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.total-row {
+  font-size: 20px;
+  border-bottom: none;
+  padding-top: 20px;
+}
+
+.total-row strong {
+  color: var(--primary);
+}
+
+.notice {
+  background: #f0f7ff;
+  color: #315574;
+  padding: 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--primary);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  margin-top: 18px;
+}
+
+.btn:hover {
+  background: #066671;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #b42318;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+.success {
+  color: #187245;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: var(--muted);
+}
+
+@media (max-width: 750px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    padding: 16px 5%;
+  }
+
+  .page-heading h1 {
+    font-size: 24px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Technitude Tours & Travels</div>
+  <a href="booking.html" id="headerBack">← Back</a>
+</header>
+
+<div class="container">
+
+  <a href="booking.html" id="backLink" class="back-link">
+    ← Back to Passenger Details
+  </a>
+
+  <div class="page-heading">
+    <h1>Wallet Payment</h1>
+    <p>Review your booking and pay using your demo wallet balance.</p>
+  </div>
+
+  <div class="layout">
+
+    <section class="card">
+      <h2>Wallet Payment</h2>
+
+      <div class="wallet-box">
+        <div class="wallet-label">Available Wallet Balance</div>
+        <div class="wallet-balance" id="walletBalance">Checking...</div>
+        <div class="wallet-caption">
+          Demo balance for your project. No real money is involved.
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <span>Passenger</span>
+        <strong id="passengerName">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Mobile Number</span>
+        <strong id="phone">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Payment Method</span>
+        <strong>MySQL Wallet</strong>
+      </div>
+
+      <div class="notice">
+        When you confirm payment, the server checks your wallet balance.
+        If sufficient, it deducts the amount and saves your booking and
+        selected seats in MySQL in one transaction.
+      </div>
+
+      <p id="errorMessage" class="error" role="alert"></p>
+      <p id="successMessage" class="success" role="status"></p>
+
+      <button type="button" class="btn" id="payButton">
+        Pay Using Wallet
+      </button>
+    </section>
+
+    <aside class="card">
+      <h2>Booking Summary</h2>
+
+      <div class="detail-row">
+        <span>Bus Name</span>
+        <strong id="busName">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Route</span>
+        <strong id="route">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Journey Date</span>
+        <strong id="journeyDate">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Bus Seats</span>
+        <strong id="seats">—</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Seat Count</span>
+        <strong id="seatCount">0</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Base Fare</span>
+        <strong id="baseFare">₹0</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Discount</span>
+        <strong id="discount">₹0</strong>
+      </div>
+
+      <div class="detail-row total-row">
+        <span>Total to Pay</span>
+        <strong id="totalAmount">₹0</strong>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<footer>
+  © 2026 Technitude Tours & Travels
+</footer>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const rawDate = params.get("date") || "";
+
+// Convert ISO date to MySQL DATE format: YYYY-MM-DD
+const journeyDate = rawDate.substring(0, 10);
+
+const booking = {
+  busId: params.get("bus_id") || "",
+  busName: params.get("bus_name") || "Bus",
+  from: params.get("from") || "",
+  to: params.get("to") || "",
+  date: journeyDate,
+  seats: (params.get("seats") || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean),
+  passengerName: params.get("passenger_name") || "",
+  age: params.get("age") || "",
+  gender: params.get("gender") || "",
+  phone: params.get("phone") || "",
+  email: params.get("email") || "",
+  baseFare: Number(params.get("base_fare")) || 0,
+  discount: Number(params.get("discount")) || 0,
+  total: Number(params.get("total")) || 0
+};
+
+function money(value) {
+  return "₹" + Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function displayDate(value) {
+  if (!value) return "—";
+
+  const date = new Date(value + "T00:00:00");
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+// Display booking information
+document.getElementById("busName").textContent = booking.busName;
+
+document.getElementById("route").textContent =
+  (booking.from || "—") + " → " + (booking.to || "—");
+
+document.getElementById("journeyDate").textContent =
+  displayDate(booking.date);
+
+document.getElementById("seats").textContent =
+  booking.seats.length ? booking.seats.join(", ") : "—";
+
+document.getElementById("seatCount").textContent =
+  booking.seats.length;
+
+document.getElementById("passengerName").textContent =
+  booking.passengerName || "—";
+
+document.getElementById("phone").textContent =
+  booking.phone || "—";
+
+document.getElementById("baseFare").textContent =
+  money(booking.baseFare);
+
+document.getElementById("discount").textContent =
+  "−" + money(booking.discount);
+
+document.getElementById("totalAmount").textContent =
+  money(booking.total);
+
+// Preserve the booking information when going back
+const bookingUrl = "booking.html?" + params.toString();
+
+document.getElementById("headerBack").href = bookingUrl;
+document.getElementById("backLink").href = bookingUrl;
+
+const walletBalanceElement = document.getElementById("walletBalance");
+const errorElement = document.getElementById("errorMessage");
+const successElement = document.getElementById("successMessage");
+const payButton = document.getElementById("payButton");
+
+// DEMO ONLY: This endpoint assumes the server has a wallet balance API.
+// The server must derive the logged-in customer ID securely.
+async function loadWalletBalance() {
+  walletBalanceElement.textContent = "Unavailable";
+
+  try {
+    const response = await fetch("/api/wallet-balance");
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Unable to load wallet.");
+    }
+
+    walletBalanceElement.textContent = money(result.balance);
+  } catch (error) {
+    walletBalanceElement.textContent = "Unavailable";
+    errorElement.textContent =
+      "Could not load wallet balance. Check your server and wallet API.";
+  }
+}
+
+loadWalletBalance();
+
+// Process wallet payment using the backend API
+payButton.addEventListener("click", async function () {
+  errorElement.textContent = "";
+  successElement.textContent = "";
+
+  if (
+    !booking.busId ||
+    !booking.from ||
+    !booking.to ||
+    !booking.date ||
+    !booking.seats.length ||
+    !booking.passengerName ||
+    !booking.age ||
+    !booking.gender ||
+    !booking.phone ||
+    !booking.email
+  ) {
+    errorElement.textContent =
+      "Booking or passenger details are missing. Return to the booking page and try again.";
+    return;
+  }
+
+  if (!Number.isFinite(booking.total) || booking.total <= 0) {
+    errorElement.textContent = "Invalid payment amount.";
+    return;
+  }
+
+  payButton.disabled = true;
+  payButton.textContent = "Processing Payment...";
+
+  try {
+    const response = await fetch("/api/wallet-pay", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        bus_id: booking.busId,
+        date: booking.date,
+        seats: booking.seats,
+        passenger_name: booking.passengerName,
+        age: booking.age,
+        gender: booking.gender,
+        phone: booking.phone,
+        email: booking.email
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      if (result.walletBalance !== undefined) {
+        walletBalanceElement.textContent = money(result.walletBalance);
+      }
+
+      throw new Error(result.message || "Wallet payment failed.");
+    }
+
+    successElement.textContent = "Payment successful! Redirecting...";
+
+    walletBalanceElement.textContent = money(result.walletBalance);
+
+    // Navigate only after the server confirms successful payment.
+    const confirmationParams = new URLSearchParams(params);
+
+    confirmationParams.set("booking_id", result.bookingId);
+    confirmationParams.set("payment_method", "WALLET");
+    confirmationParams.set("payment_status", "PAID");
+    confirmationParams.set("total", result.amountDeducted);
+    confirmationParams.set("wallet_balance", result.walletBalance);
+
+    window.location.href =
+      "confirmation.html?" + confirmationParams.toString();
+
+  } catch (error) {
+    errorElement.textContent = error.message || "Payment failed.";
+    payButton.disabled = false;
+    payButton.textContent = "Pay Using Wallet";
+  }
+});
+</script>
+
+</body>
+</html>

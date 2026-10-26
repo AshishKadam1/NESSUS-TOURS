@@ -1,0 +1,605 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Details | Technitude Tours & Travels</title>
+
+<style>
+:root {
+  --primary: #087e8b;
+  --dark: #18343d;
+  --bg: #f3f7f9;
+  --border: #dce5e9;
+  --muted: #667980;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--dark);
+}
+
+header {
+  background: #fff;
+  padding: 18px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px #0000000b;
+}
+
+.logo {
+  color: var(--primary);
+  font-size: 23px;
+  font-weight: bold;
+}
+
+header a {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 18px;
+}
+
+.page-title {
+  margin-bottom: 22px;
+}
+
+.page-title h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.page-title p {
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.route {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.route strong {
+  font-size: 19px;
+}
+
+.route .arrow {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.detail-label {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.detail-value {
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 7px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd8dd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+  background: #fff;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 17px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 15px 0;
+  color: #465b62;
+}
+
+.summary-row strong {
+  color: var(--dark);
+  text-align: right;
+}
+
+.total {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  font-size: 19px;
+  font-weight: bold;
+}
+
+.notice {
+  background: #eaf7f8;
+  padding: 13px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #24565d;
+  margin-top: 15px;
+}
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 9px;
+  background: var(--primary);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.btn:hover {
+  background: #066671;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.error {
+  color: #b42318;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+}
+
+@media (max-width: 750px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full {
+    grid-column: auto;
+  }
+
+  header {
+    padding: 16px 5%;
+  }
+
+  .details {
+    gap: 14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Technitude Tours & Travels</div>
+  <a href="bus-results.html">← Back to Buses</a>
+</header>
+
+<div class="container">
+
+  <a href="javascript:history.back()" class="back-link">
+    ← Back to Seat Selection
+  </a>
+
+  <div class="page-title">
+    <h1>Complete Your Booking</h1>
+    <p>Enter passenger details and review your journey before continuing.</p>
+  </div>
+
+  <div class="layout">
+
+    <div>
+
+      <section class="card">
+        <h2>Journey Details</h2>
+
+        <div class="route">
+          <div>
+            <div class="detail-label">FROM</div>
+            <strong id="fromCity">—</strong>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div style="text-align:right">
+            <div class="detail-label">TO</div>
+            <strong id="toCity">—</strong>
+          </div>
+        </div>
+
+        <div class="details">
+          <div>
+            <div class="detail-label">Bus Name</div>
+            <div class="detail-value" id="busName">—</div>
+          </div>
+
+          <div>
+            <div class="detail-label">Bus Type</div>
+            <div class="detail-value" id="busType">—</div>
+          </div>
+
+          <div>
+            <div class="detail-label">Journey Date</div>
+            <div class="detail-value" id="journeyDate">—</div>
+          </div>
+
+          <div>
+            <div class="detail-label">Selected Seats</div>
+            <div class="detail-value" id="selectedSeats">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Passenger Details</h2>
+
+        <form id="bookingForm">
+
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="passengerName">Full Name *</label>
+              <input
+                type="text"
+                id="passengerName"
+                name="passengerName"
+                placeholder="Enter full name"
+                required
+                maxlength="100"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="age">Age *</label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                min="1"
+                max="120"
+                placeholder="Enter age"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender *</label>
+              <select id="gender" name="gender" required>
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Mobile Number *</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                inputmode="numeric"
+                pattern="[6-9][0-9]{9}"
+                maxlength="10"
+                placeholder="10-digit mobile number"
+                required
+              >
+            </div>
+
+            <div class="form-group full">
+              <label for="email">Email Address *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter email address"
+                required
+                maxlength="150"
+              >
+            </div>
+
+          </div>
+
+          <div class="notice">
+            Please check your name, contact details and journey information
+            before proceeding.
+          </div>
+
+          <p id="errorMessage" class="error" role="alert"></p>
+
+          <button type="submit" class="btn" id="continueBtn">
+            Continue to Payment
+          </button>
+
+        </form>
+      </section>
+
+    </div>
+
+    <aside class="card">
+      <h2>Fare Summary</h2>
+
+      <div class="summary-row">
+        <span>Seat Count</span>
+        <strong id="seatCount">0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Price per Seat</span>
+        <strong id="pricePerSeat">₹0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Base Fare</span>
+        <strong id="baseFare">₹0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Coupon</span>
+        <strong id="couponCode">None</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Discount</span>
+        <strong id="discount">₹0</strong>
+      </div>
+
+      <div class="summary-row total">
+        <span>Total Amount</span>
+        <strong id="totalAmount">₹0</strong>
+      </div>
+
+      <div class="notice">
+        Your booking is not confirmed yet. Continue to the next step to
+        review payment options.
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<footer>
+  © 2026 Technitude Tours & Travels
+</footer>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+
+const booking = {
+  busId: params.get("bus_id") || params.get("id") || "",
+  busName: params.get("bus_name") || params.get("name") || "Bus",
+  from: params.get("from") || params.get("from_city") || "",
+  to: params.get("to") || params.get("to_city") || "",
+  date: params.get("date") || params.get("journey_date") || "",
+  busType: params.get("bus_type") || params.get("type") || "Bus",
+  price: Number(params.get("price")) || 0,
+  seats: (params.get("seats") || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean),
+  baseFare: Number(params.get("base_fare")) || 0,
+  couponCode: params.get("coupon_code") || "",
+  discount: Number(params.get("discount")) || 0,
+  total: Number(params.get("total")) || 0
+};
+
+function money(amount) {
+  return "₹" + Number(amount || 0).toLocaleString("en-IN");
+}
+
+function displayDate(dateString) {
+  if (!dateString) return "Not provided";
+
+  const date = new Date(dateString + "T00:00:00");
+
+  if (Number.isNaN(date.getTime())) return dateString;
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+// Display journey information
+document.getElementById("fromCity").textContent =
+  booking.from || "Not provided";
+
+document.getElementById("toCity").textContent =
+  booking.to || "Not provided";
+
+document.getElementById("busName").textContent =
+  booking.busName;
+
+document.getElementById("busType").textContent =
+  booking.busType;
+
+document.getElementById("journeyDate").textContent =
+  displayDate(booking.date);
+
+document.getElementById("selectedSeats").textContent =
+  booking.seats.length ? booking.seats.join(", ") : "No seats selected";
+
+// Display fare
+const seatCount = booking.seats.length;
+const baseFare = booking.baseFare || seatCount * booking.price;
+const discount = Math.min(Math.max(booking.discount, 0), baseFare);
+const total = Math.max(baseFare - discount, 0);
+
+document.getElementById("seatCount").textContent = seatCount;
+document.getElementById("pricePerSeat").textContent =
+  money(booking.price);
+
+document.getElementById("baseFare").textContent =
+  money(baseFare);
+
+document.getElementById("couponCode").textContent =
+  booking.couponCode || "None";
+
+document.getElementById("discount").textContent =
+  "−" + money(discount);
+
+document.getElementById("totalAmount").textContent =
+  money(total);
+
+// Validate booking and move to the payment step
+document.getElementById("bookingForm").addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const error = document.getElementById("errorMessage");
+  error.textContent = "";
+
+  if (!booking.busId) {
+    error.textContent =
+      "Bus ID missing. Please go back and select your bus again.";
+    return;
+  }
+
+  if (!booking.from || !booking.to || !booking.date) {
+    error.textContent =
+      "Journey details are missing. Please select your bus and journey again.";
+    return;
+  }
+
+  if (!seatCount) {
+    error.textContent =
+      "No seats selected. Please go back and select your seats.";
+    return;
+  }
+
+  if (!Number.isFinite(booking.price) || booking.price <= 0) {
+    error.textContent =
+      "Seat price is missing. Please select your bus again.";
+    return;
+  }
+
+  const formData = new FormData(this);
+
+  const passengerName = String(formData.get("passengerName") || "").trim();
+  const age = Number(formData.get("age"));
+  const gender = String(formData.get("gender") || "");
+  const phone = String(formData.get("phone") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+
+  if (!passengerName || !Number.isInteger(age) || age < 1 || age > 120) {
+    error.textContent = "Please enter valid passenger details.";
+    return;
+  }
+
+  if (!/^[6-9][0-9]{9}$/.test(phone)) {
+    error.textContent = "Enter a valid 10-digit Indian mobile number.";
+    return;
+  }
+
+  const paymentParams = new URLSearchParams({
+    bus_id: booking.busId,
+    bus_name: booking.busName,
+    from: booking.from,
+    to: booking.to,
+    date: booking.date,
+    bus_type: booking.busType,
+    price: String(booking.price),
+    seats: booking.seats.join(","),
+    base_fare: String(baseFare),
+    coupon_code: booking.couponCode,
+    discount: String(discount),
+    total: String(total),
+    passenger_name: passengerName,
+    age: String(age),
+    gender: gender,
+    phone: phone,
+    email: email
+  });
+
+  // Next page: payment.html
+  window.location.href = "payment.html?" + paymentParams.toString();
+});
+</script>
+
+</body>
+</html>

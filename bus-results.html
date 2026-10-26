@@ -759,11 +759,9 @@ window.availableBuses = buses;
 
         }
 
-
-        /* VIEW SEATS */
-
  
 /* VIEW SEATS */
+
 function viewSeats(busId) {
     const selectedBus = window.availableBuses?.find(
         bus => String(bus.id) === String(busId)
@@ -774,99 +772,57 @@ function viewSeats(busId) {
         alert("Bus details not found. Please refresh and try again.");
         return;
     }
+    console.log("Bus journey_date:", selectedBus.journey_date);
+console.log("Journey date type:", typeof selectedBus.journey_date);
 
-    const params = new URLSearchParams({
+    const query = new URLSearchParams({
         bus_id: selectedBus.id,
-        bus_name: selectedBus.bus_name || "",
-        bus_type: selectedBus.bus_type || "",
-        from: selectedBus.from_city || from || "",
-        to: selectedBus.to_city || to || "",
-        date: selectedBus.journey_date || date || "",
-        price: selectedBus.price || 0,
-        total_seats: selectedBus.total_seats || 30
+        bus_name: selectedBus.bus_name,
+        from: selectedBus.from_city,
+        to: selectedBus.to_city,
+        date: String(selectedBus.journey_date).slice(0, 10),
+        price: selectedBus.price,
+        total_seats: selectedBus.total_seats
     });
 
     window.location.href =
-        "seat-selection.html?" + params.toString();
+        `seat-selection.html?${query.toString()}`;
 }
 
-        /* FORMAT TIME */
 
-        function formatTime(time) {
+/* FORMAT TIME */
 
-            if (!time) {
+function formatTime(time) {
+    if (!time) {
+        return "-";
+    }
 
-                return "-";
+    const parts = String(time).split(":");
+    let hour = Number(parts[0]);
+    const minute = parts[1] || "00";
 
-            }
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
 
-
-            const parts =
-                String(time).split(":");
-
-
-            let hour =
-                Number(parts[0]);
-
-
-            const minute =
-                parts[1] || "00";
+    return hour + ":" + minute + " " + ampm;
+}
 
 
-            const ampm =
-                hour >= 12
-                    ? "PM"
-                    : "AM";
+/* SECURITY */
 
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (char) {
+        const entities = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        };
 
-            hour =
-                hour % 12 || 12;
-
-
-            return (
-                hour +
-                ":" +
-                minute +
-                " " +
-                ampm
-            );
-
-        }
-
-
-        /* SECURITY */
-
-        function escapeHtml(value) {
-
-            return String(value)
-
-                .replaceAll(
-                    "&",
-                    "&amp;"
-                )
-
-                .replaceAll(
-                    "<",
-                    "&lt;"
-                )
-
-                .replaceAll(
-                    ">",
-                    "&gt;"
-                )
-
-                .replaceAll(
-                    '"',
-                    "&quot;"
-                )
-
-                .replaceAll(
-                    "'",
-                    "&#039;"
-                );
-
-        }
-
+        return entities[char];
+    });
+}
     </script>
 
 </body>

@@ -128,7 +128,63 @@
         .login-button:hover {
             background: var(--primary-dark);
         }
+        .user-avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            transition: 0.2s;
+        }
+        .user-avatar:hover {
+            background: var(--primary-dark);
+        }
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            width: 160px;
+            padding: 8px 0;
+            z-index: 1000;
+        }
 
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .user-dropdown button:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
         /* Hero */
         .hero {
             background: linear-gradient(
@@ -293,7 +349,7 @@
                     </a>
                 </li>
 
-                <li>
+                <li id="navLoginItem">
                     <a href="login.html" class="login-button">
                         Login
                     </a>
@@ -407,6 +463,69 @@
     <footer>
         <p>© 2026 Technitude Travels. All Rights Reserved.</p>
     </footer>
+    <script>
+        function checkAuthState() {
+            const userJson = localStorage.getItem('loggedInUser');
+            const navLoginItem = document.getElementById('navLoginItem');
+            if (!navLoginItem) return;
 
+            if (userJson) {
+                try {
+                    const user = JSON.parse(userJson);
+                    const name = user.full_name || user.email || 'U';
+                    
+                    // Get initials (up to 2 characters)
+                    const parts = name.trim().split(' ');
+                    let initials = '';
+                    if (parts.length >= 2) {
+                        initials = (parts[0][0] + parts[1][0]).toUpperCase();
+                    } else {
+                        initials = name.substring(0, 2).toUpperCase();
+                    }
+
+                    // If support/admin, you can also optionally show a Dashboard link alongside the avatar or keep it clean
+                    navLoginItem.innerHTML = `
+                        <div class="user-avatar-container">
+                            <div class="user-avatar" onclick="toggleUserDropdown(event)" title="${name}">
+                                ${initials}
+                            </div>
+                            <div class="user-dropdown" id="userDropdown">
+                                ${(user.role === 'SUPPORT' || user.role === 'ADMIN') ? '<button onclick="location.href=\'support.html\'" style="color:var(--primary);">Dashboard</button>' : ''}
+                                <button onclick="handleLogout()">Logout</button>
+                            </div>
+                        </div>
+                    `;
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+        }
+
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Do you want to logout?')) {
+                localStorage.removeItem('loggedInUser');
+                window.location.href = 'home.html';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Run check on page load
+        document.addEventListener("DOMContentLoaded", checkAuthState);
+    </script>
 </body>
 </html>

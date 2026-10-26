@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Booking | Technitude Tours & Travels</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #243047;
+    }
+    header {
+      background: #12345a;
+      color: white;
+      padding: 20px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header a { color: white; text-decoration: none; }
+    main {
+      max-width: 850px;
+      margin: 45px auto;
+      padding: 20px;
+    }
+    .panel {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 22px #142b4510;
+    }
+    h1 { margin-top: 0; }
+    .search {
+      display: flex;
+      gap: 10px;
+      margin: 22px 0;
+    }
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #ccd4df;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 13px 20px;
+      background: #087fce;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:hover { background: #0666a5; }
+    #result {
+      margin-top: 20px;
+      overflow-wrap: anywhere;
+    }
+    .booking {
+      border: 1px solid #dce4ed;
+      border-radius: 9px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+    .booking p { line-height: 1.7; }
+    .status { font-weight: bold; color: #087f58; }
+    .error { color: #c62828; }
+    @media (max-width: 500px) {
+      .search { flex-direction: column; }
+      .panel { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Technitude Tours & Travels</strong>
+    <a href="home.html">← Back to Home</a>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h1>Manage Your Booking</h1>
+      <p>Enter your booking ID to check your journey details and booking status.</p>
+
+      <form id="searchForm" class="search">
+        <input
+          type="number"
+          id="bookingId"
+          placeholder="Enter Booking ID"
+          min="1"
+          required
+        >
+        <button type="submit">Search Booking</button>
+      </form>
+
+      <div id="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("searchForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const id = document.getElementById("bookingId").value.trim();
+      if (!id || Number(id) < 1) return;
+
+      result.textContent = "Searching booking...";
+
+      try {
+        const response = await fetch(
+          `/api/bookings/${encodeURIComponent(id)}`
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Booking not found.");
+        }
+
+        const booking = data.booking || data;
+        result.replaceChildren();
+
+        const card = document.createElement("div");
+        card.className = "booking";
+
+        const fields = [
+          ["Booking ID", booking.id ?? booking.booking_id],
+          ["Bus", booking.bus_name],
+          ["Route", `${booking.from_city || ""} → ${booking.to_city || ""}`],
+          ["Journey Date", booking.journey_date],
+          ["Departure", booking.departure_time],
+          ["Arrival", booking.arrival_time],
+          ["Seats", booking.seats],
+          ["Total Fare", booking.total_amount ?? booking.total_fare],
+          ["Booking Status", booking.status],
+          ["Payment Status", booking.payment_status]
+        ];
+
+        fields.forEach(([label, value]) => {
+          if (value == null || value === "") return;
+          const p = document.createElement("p");
+          const strong = document.createElement("strong");
+          strong.textContent = label + ": ";
+          p.append(strong, document.createTextNode(String(value)));
+          card.appendChild(p);
+        });
+
+        result.appendChild(card);
+      } catch (error) {
+        result.replaceChildren();
+        const p = document.createElement("p");
+        p.className = "error";
+        p.textContent = error.message || "Unable to find booking.";
+        result.appendChild(p);
+      }
+    });
+  </script>
+</body>
+</html>
