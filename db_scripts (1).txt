@@ -1,21 +1,24 @@
-CREATE DATABASE IF NOT EXISTS Travels;
+-- Drop and recreate database
+DROP DATABASE IF EXISTS Travels;
+CREATE DATABASE Travels;
 USE Travels;
-SHOW TABLES;
+
+-- 1. Users Table
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
-    phone VARCHAR(15) UNIQUE DEFAULT NULL, -- Changed from NOT NULL to DEFAULT NULL
+    phone VARCHAR(15) UNIQUE DEFAULT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('CUSTOMER', 'AGENT', 'OPERATOR', 'SUPPORT', 'ADMIN') DEFAULT 'CUSTOMER',
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-SELECT * FROM users;
-DELETE FROM users WHERE id = 6;
 
+-- 2. Buses Table
 CREATE TABLE buses (
-    id INT NOT NULL AUTO_INCREMENT,
+    bus_id INT AUTO_INCREMENT PRIMARY KEY,
+    operator_id INT DEFAULT 1,
     bus_name VARCHAR(100) NOT NULL,
     bus_number VARCHAR(50) DEFAULT NULL,
     bus_type VARCHAR(50) DEFAULT NULL,
@@ -26,164 +29,172 @@ CREATE TABLE buses (
     arrival_time TIME NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     total_seats INT NOT NULL,
-    PRIMARY KEY (id)
+    FOREIGN KEY (operator_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-INSERT INTO buses (
-    id,
-    bus_name,
-    bus_number,
-    bus_type,
-    from_city,
-    to_city,
-    journey_date,
-    departure_time,
-    arrival_time,
-    price,
-    total_seats
-)
-VALUES
-(1, 'Technitude Express', 'MH09TT1001', 'AC Sleeper',
- 'Kolhapur', 'Pune', '2026-10-10', '08:00:00', '14:00:00', 650.00, 40),
-(2, 'Technitude Travels', 'MH12TT1002', 'AC Seater',
- 'Kolhapur', 'Pune', '2026-10-10', '10:30:00', '16:30:00', 550.00, 40),
-(3, 'Technitude Express', 'MH12TT1003', 'AC Seater',
- 'Pune', 'Mumbai', '2026-10-10', '07:00:00', '11:00:00', 500.00, 40),
-(4, 'Technitude Travels', 'MH12TT1004', 'AC Sleeper',
- 'Pune', 'Mumbai', '2026-10-10', '21:30:00', '01:30:00', 399.00, 40);
- 
- SELECT * FROM buses;
-USE Travels;
-
-INSERT INTO buses
-(bus_name, bus_number, bus_type, from_city, to_city,
- journey_date, departure_time, arrival_time, price, total_seats)
-VALUES
--- 15 October
-('Technitude Express', 'MH09TT1015', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-15', '08:00:00', '14:00:00', 650.00, 40),
-('Technitude Travels', 'MH12TT1016', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-15', '10:30:00', '16:30:00', 550.00, 40),
-('Technitude Express', 'MH12TT1017', 'AC Seater', 'Pune', 'Mumbai', '2026-10-15', '07:00:00', '11:00:00', 500.00, 40),
-
--- 16 October
-('Technitude Travels', 'MH14TT1018', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-16', '21:30:00', '01:30:00', 399.00, 40),
-('Technitude Express', 'MH09TT1019', 'Non-AC Seater', 'Pune', 'Kolhapur', '2026-10-16', '06:30:00', '13:00:00', 450.00, 40),
-('Technitude Travels', 'MH12TT1020', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-16', '22:00:00', '02:30:00', 700.00, 40),
-
--- 17 October
-('Technitude Express', 'MH14TT1021', 'AC Seater', 'Kolhapur', 'Mumbai', '2026-10-17', '09:00:00', '18:00:00', 800.00, 40),
-('Technitude Travels', 'MH09TT1022', 'AC Sleeper', 'Mumbai', 'Kolhapur', '2026-10-17', '20:30:00', '05:00:00', 850.00, 40),
-('Technitude Express', 'MH12TT1023', 'Non-AC Seater', 'Pune', 'Mumbai', '2026-10-17', '12:00:00', '16:30:00', 350.00, 40),
-
--- 18 October
-('Technitude Travels', 'MH14TT1024', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-18', '22:00:00', '05:00:00', 750.00, 40),
-('Technitude Express', 'MH09TT1025', 'AC Seater', 'Pune', 'Kolhapur', '2026-10-18', '07:30:00', '14:00:00', 600.00, 40),
-('Technitude Travels', 'MH12TT1026', 'AC Seater', 'Mumbai', 'Pune', '2026-10-18', '15:00:00', '19:30:00', 450.00, 40),
-
--- 19 October
-('Technitude Express', 'MH14TT1027', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-19', '21:00:00', '01:00:00', 650.00, 40),
-('Technitude Travels', 'MH09TT1028', 'Non-AC Seater', 'Kolhapur', 'Pune', '2026-10-19', '06:00:00', '12:30:00', 400.00, 40),
-
--- 20 October
-('Technitude Express', 'MH12TT1029', 'AC Seater', 'Pune', 'Mumbai', '2026-10-20', '08:30:00', '13:00:00', 500.00, 40),
-('Technitude Travels', 'MH14TT1030', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-20', '22:30:00', '03:00:00', 699.00, 40),
-('Technitude Express', 'MH09TT1031', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-10-20', '20:00:00', '05:00:00', 900.00, 40),
-
--- 21 October
-('Technitude Travels', 'MH12TT1032', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-21', '11:00:00', '17:00:00', 575.00, 40),
-('Technitude Express', 'MH14TT1033', 'Non-AC Seater', 'Mumbai', 'Pune', '2026-10-21', '06:00:00', '10:30:00', 300.00, 40),
-
--- 22 October
-('Technitude Travels', 'MH09TT1034', 'AC Sleeper', 'Pune', 'Kolhapur', '2026-10-22', '21:30:00', '04:30:00', 700.00, 40),
-('Technitude Express', 'MH12TT1035', 'AC Seater', 'Mumbai', 'Kolhapur', '2026-10-22', '07:00:00', '16:00:00', 750.00, 40),
-('Technitude Travels', 'MH14TT1036', 'AC Seater', 'Pune', 'Mumbai', '2026-10-22', '14:00:00', '18:30:00', 475.00, 40),
-
--- 23 October
-('Technitude Express', 'MH09TT1037', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-23', '21:00:00', '01:30:00', 650.00, 40),
-('Technitude Travels', 'MH12TT1038', 'Non-AC Seater', 'Kolhapur', 'Mumbai', '2026-10-23', '08:00:00', '17:00:00', 600.00, 40),
-
--- 24 October
-('Technitude Express', 'MH14TT1039', 'AC Seater', 'Pune', 'Kolhapur', '2026-10-24', '09:00:00', '15:30:00', 550.00, 40),
-('Technitude Travels', 'MH09TT1040', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-24', '21:00:00', '04:00:00', 700.00, 40),
-('Technitude Express', 'MH12TT1041', 'AC Seater', 'Mumbai', 'Pune', '2026-10-24', '13:00:00', '17:30:00', 475.00, 40),
-
--- 25 October
-('Technitude Travels', 'MH14TT1042', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-25', '22:00:00', '02:00:00', 699.00, 40),
-('Technitude Express', 'MH09TT1043', 'Non-AC Seater', 'Pune', 'Kolhapur', '2026-10-25', '06:30:00', '13:00:00', 425.00, 40),
-
--- 26 October
-('Technitude Travels', 'MH12TT1044', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-26', '07:00:00', '13:00:00', 525.00, 40),
-('Technitude Express', 'MH14TT1045', 'AC Sleeper', 'Mumbai', 'Kolhapur', '2026-10-26', '20:00:00', '05:00:00', 875.00, 40),
-('Technitude Travels', 'MH09TT1046', 'AC Seater', 'Pune', 'Mumbai', '2026-10-26', '16:00:00', '20:30:00', 500.00, 40),
-
--- 27 October
-('Technitude Express', 'MH12TT1047', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-10-27', '21:30:00', '06:30:00', 899.00, 40),
-('Technitude Travels', 'MH14TT1048', 'Non-AC Seater', 'Mumbai', 'Pune', '2026-10-27', '08:00:00', '12:30:00', 325.00, 40),
-
--- 28 October
-('Technitude Express', 'MH09TT1049', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-28', '12:00:00', '18:00:00', 575.00, 40),
-('Technitude Travels', 'MH12TT1050', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-28', '22:30:00', '02:30:00', 675.00, 40),
-
--- 29 October
-('Technitude Express', 'MH14TT1051', 'AC Seater', 'Mumbai', 'Pune', '2026-10-29', '10:00:00', '14:30:00', 475.00, 40),
-('Technitude Travels', 'MH09TT1052', 'AC Sleeper', 'Pune', 'Kolhapur', '2026-10-29', '20:30:00', '03:30:00', 725.00, 40),
-
--- 30 October
-('Technitude Express', 'MH12TT1053', 'AC Seater', 'Kolhapur', 'Pune', '2026-10-30', '09:30:00', '15:30:00', 550.00, 40),
-('Technitude Travels', 'MH14TT1054', 'AC Sleeper', 'Mumbai', 'Pune', '2026-10-30', '21:30:00', '02:00:00', 699.00, 40);
-
-
+-- 3. Bookings Table
 CREATE TABLE bookings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT AUTO_INCREMENT PRIMARY KEY,
     booking_reference VARCHAR(20) UNIQUE NOT NULL,
     user_id INT NOT NULL,
     bus_id INT NOT NULL,
     journey_date DATE NOT NULL,
     seats_booked INT NOT NULL DEFAULT 1,
     total_amount DECIMAL(10,2) NOT NULL,
-    booking_status ENUM(
-        'CONFIRMED',
-        'CANCELLED'
-    ) DEFAULT 'CONFIRMED',
+    booking_status ENUM('CONFIRMED', 'CANCELLED') DEFAULT 'CONFIRMED',
     booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (bus_id) REFERENCES buses(id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (bus_id) REFERENCES buses(bus_id) ON DELETE CASCADE,
 
     CHECK (seats_booked > 0),
     CHECK (total_amount >= 0)
 );
 
+-- 4. Support Messages Table
 CREATE TABLE support_messages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    parent_id INT DEFAULT NULL,         -- NULL for the main inquiry, points to the main message ID for replies
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT DEFAULT NULL,
     full_name VARCHAR(100),
     email VARCHAR(100),
     phone VARCHAR(20),
     subject VARCHAR(255),
     message TEXT NOT NULL,
     sender_type ENUM('CUSTOMER', 'SUPPORT') DEFAULT 'CUSTOMER',
-    status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, RESOLVED
+    status VARCHAR(20) DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES support_messages(id) ON DELETE CASCADE
+    
+    FOREIGN KEY (parent_id) REFERENCES support_messages(message_id) ON DELETE CASCADE
 );
-SELECT * FROM support_messages;
-DELETE FROM support_messages;
 
--- 1. Link buses to the operator who owns them
-ALTER TABLE buses 
-ADD COLUMN operator_id INT,
-ADD CONSTRAINT fk_buses_operator FOREIGN KEY (operator_id) REFERENCES users(id) ON DELETE CASCADE;
+-- ==========================================
+-- SEED DATA: Insert Default Operator User
+-- ==========================================
+INSERT INTO users (user_id, full_name, email, phone, password_hash, role) VALUES 
+(1, 'Technitude Operator', 'operator@technitude.com', '9876543210', '$2b$10$placeholderhashforsecurelogin', 'OPERATOR');
 
--- 2. Link schedules to the operator
-ALTER TABLE bus_schedules 
-ADD COLUMN operator_id INT,
-ADD CONSTRAINT fk_schedules_operator FOREIGN KEY (operator_id) REFERENCES users(id) ON DELETE CASCADE;
+-- ==========================================
+-- SEED DATA: Bus Schedules (Oct 28 - Nov 20)
+-- ==========================================
+INSERT INTO buses 
+(operator_id, bus_name, bus_number, bus_type, from_city, to_city, journey_date, departure_time, arrival_time, price, total_seats) 
+VALUES 
+-- October 28, 2026
+(1, 'Technitude Express', 'MH12TT1001', 'AC Seater', 'Pune', 'Mumbai', '2026-10-28', '07:00:00', '11:30:00', 550.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1002', 'AC Sleeper', 'Kolhapur', 'Pune', '2026-10-28', '21:00:00', '04:00:00', 700.00, 36),
+(1, 'Goa Voyager', 'MH08TT1003', 'Non-AC Seater', 'Mumbai', 'Goa', '2026-10-28', '18:00:00', '06:00:00', 950.00, 45),
 
--- Assign all existing buses to your operator user (assuming operator user id = 1)
-UPDATE buses SET operator_id = 1 WHERE operator_id IS NULL;
--- Check your user IDs and bus records first
-SELECT id, full_name, email, role FROM users WHERE role = 'OPERATOR';
-SELECT id, bus_name, operator_id FROM buses;
+-- October 29, 2026
+(1, 'Shivneri Links', 'MH12TT1004', 'AC Seater', 'Pune', 'Mumbai', '2026-10-29', '08:30:00', '13:00:00', 575.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1005', 'AC Sleeper', 'Nagpur', 'Pune', '2026-10-29', '19:00:00', '09:00:00', 1200.00, 36),
+(1, 'Deccan Cruiser', 'MH15TT1006', 'AC Seater', 'Nashik', 'Pune', '2026-10-29', '06:00:00', '10:30:00', 500.00, 40),
 
--- Assign buses to your operator ID (e.g., operator id = 1)
-UPDATE buses SET operator_id = 1 WHERE operator_id IS NULL;
+-- October 30, 2026
+(1, 'Technitude Express', 'MH12TT1007', 'AC Sleeper', 'Pune', 'Mumbai', '2026-10-30', '22:00:00', '03:00:00', 675.00, 40),
+(1, 'Sangli Travels', 'MH10TT1008', 'Non-AC Seater', 'Sangli', 'Mumbai', '2026-10-30', '20:00:00', '06:00:00', 800.00, 45),
+(1, 'Satara Rider', 'MH11TT1009', 'AC Seater', 'Satara', 'Pune', '2026-10-30', '09:00:00', '12:00:00', 400.00, 40),
+
+-- October 31, 2026
+(1, 'Shivneri Links', 'MH12TT1010', 'AC Seater', 'Pune', 'Mumbai', '2026-10-31', '06:30:00', '11:00:00', 550.00, 40),
+(1, 'Goa Voyager', 'MH08TT1011', 'AC Sleeper', 'Goa', 'Pune', '2026-10-31', '20:30:00', '07:30:00', 1100.00, 36),
+(1, 'Nashik Express', 'MH15TT1012', 'Non-AC Seater', 'Nashik', 'Nagpur', '2026-10-31', '21:00:00', '08:00:00', 900.00, 45),
+
+-- November 01, 2026
+(1, 'Technitude Express', 'MH12TT1013', 'AC Seater', 'Pune', 'Mumbai', '2026-11-01', '07:00:00', '11:30:00', 575.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1014', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-11-01', '21:30:00', '07:00:00', 850.00, 36),
+(1, 'Satara Rider', 'MH11TT1015', 'AC Seater', 'Satara', 'Goa', '2026-11-01', '22:00:00', '05:00:00', 750.00, 40),
+
+-- November 02, 2026
+(1, 'Shivneri Links', 'MH12TT1016', 'AC Seater', 'Pune', 'Mumbai', '2026-11-02', '10:00:00', '14:30:00', 550.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1017', 'AC Sleeper', 'Nagpur', 'Mumbai', '2026-11-02', '18:00:00', '10:00:00', 1300.00, 36),
+(1, 'Sangli Travels', 'MH10TT1018', 'Non-AC Seater', 'Sangli', 'Pune', '2026-11-02', '08:00:00', '12:30:00', 450.00, 45),
+
+-- November 03, 2026
+(1, 'Technitude Express', 'MH12TT1019', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-03', '23:00:00', '04:00:00', 675.00, 40),
+(1, 'Nashik Express', 'MH15TT1020', 'AC Seater', 'Nashik', 'Pune', '2026-11-03', '07:00:00', '11:30:00', 500.00, 40),
+(1, 'Goa Voyager', 'MH08TT1021', 'AC Sleeper', 'Goa', 'Kolhapur', '2026-11-03', '21:00:00', '03:00:00', 650.00, 36),
+
+-- November 04, 2026
+(1, 'Shivneri Links', 'MH12TT1022', 'AC Seater', 'Pune', 'Mumbai', '2026-11-04', '09:00:00', '13:30:00', 550.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1023', 'Non-AC Seater', 'Kolhapur', 'Pune', '2026-11-04', '14:00:00', '19:00:00', 450.00, 45),
+(1, 'Satara Rider', 'MH11TT1024', 'AC Sleeper', 'Satara', 'Mumbai', '2026-11-04', '22:30:00', '04:30:00', 700.00, 36),
+
+-- November 05, 2026
+(1, 'Technitude Express', 'MH12TT1025', 'AC Seater', 'Pune', 'Mumbai', '2026-11-05', '07:30:00', '12:00:00', 575.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1026', 'AC Sleeper', 'Nagpur', 'Pune', '2026-11-05', '19:30:00', '09:30:00', 1200.00, 36),
+(1, 'Sangli Travels', 'MH10TT1027', 'AC Seater', 'Sangli', 'Goa', '2026-11-05', '11:00:00', '17:00:00', 600.00, 40),
+
+-- November 06, 2026
+(1, 'Shivneri Links', 'MH12TT1028', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-06', '22:30:00', '03:00:00', 675.00, 40),
+(1, 'Nashik Express', 'MH15TT1029', 'Non-AC Seater', 'Nashik', 'Mumbai', '2026-11-06', '20:00:00', '03:00:00', 700.00, 45),
+(1, 'Kolhapur Travels', 'MH09TT1030', 'AC Seater', 'Kolhapur', 'Pune', '2026-11-06', '08:00:00', '13:00:00', 550.00, 40),
+
+-- November 07, 2026
+(1, 'Technitude Express', 'MH12TT1031', 'AC Seater', 'Pune', 'Mumbai', '2026-11-07', '08:00:00', '12:30:00', 550.00, 40),
+(1, 'Goa Voyager', 'MH08TT1032', 'AC Sleeper', 'Goa', 'Pune', '2026-11-07', '21:00:00', '07:30:00', 1100.00, 36),
+(1, 'Satara Rider', 'MH11TT1033', 'AC Seater', 'Satara', 'Nagpur', '2026-11-07', '18:00:00', '08:00:00', 1250.00, 40),
+
+-- November 08, 2026
+(1, 'Shivneri Links', 'MH12TT1034', 'AC Seater', 'Pune', 'Mumbai', '2026-11-08', '07:00:00', '11:30:00', 575.00, 40),
+(1, 'Sangli Travels', 'MH10TT1035', 'AC Sleeper', 'Sangli', 'Mumbai', '2026-11-08', '21:00:00', '05:30:00', 850.00, 36),
+(1, 'Nashik Express', 'MH15TT1036', 'Non-AC Seater', 'Nashik', 'Pune', '2026-11-08', '13:00:00', '17:30:00', 450.00, 45),
+
+-- November 09, 2026
+(1, 'Technitude Express', 'MH12TT1037', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-09', '23:30:00', '04:00:00', 675.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1038', 'AC Seater', 'Kolhapur', 'Goa', '2026-11-09', '09:00:00', '15:00:00', 600.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1039', 'Non-AC Seater', 'Nagpur', 'Mumbai', '2026-11-09', '17:00:00', '09:00:00', 950.00, 45),
+
+-- November 10, 2026
+(1, 'Shivneri Links', 'MH12TT1040', 'AC Seater', 'Pune', 'Mumbai', '2026-11-10', '06:00:00', '10:30:00', 550.00, 40),
+(1, 'Satara Rider', 'MH11TT1041', 'AC Sleeper', 'Satara', 'Pune', '2026-11-10', '22:00:00', '01:00:00', 400.00, 36),
+(1, 'Goa Voyager', 'MH08TT1042', 'AC Seater', 'Goa', 'Mumbai', '2026-11-10', '19:00:00', '07:00:00', 1000.00, 40),
+
+-- November 11, 2026
+(1, 'Technitude Express', 'MH12TT1043', 'AC Seater', 'Pune', 'Mumbai', '2026-11-11', '08:30:00', '13:00:00', 575.00, 40),
+(1, 'Nashik Express', 'MH15TT1044', 'AC Sleeper', 'Nashik', 'Nagpur', '2026-11-11', '20:30:00', '07:30:00', 1100.00, 36),
+(1, 'Sangli Travels', 'MH10TT1045', 'Non-AC Seater', 'Sangli', 'Pune', '2026-11-11', '10:00:00', '14:30:00', 450.00, 45),
+
+-- November 12, 2026
+(1, 'Shivneri Links', 'MH12TT1046', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-12', '22:00:00', '02:30:00', 675.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1047', 'AC Seater', 'Kolhapur', 'Pune', '2026-11-12', '11:00:00', '16:00:00', 550.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1048', 'AC Sleeper', 'Nagpur', 'Pune', '2026-11-12', '18:30:00', '08:30:00', 1200.00, 36),
+
+-- November 13, 2026
+(1, 'Technitude Express', 'MH12TT1049', 'AC Seater', 'Pune', 'Mumbai', '2026-11-13', '07:00:00', '11:30:00', 550.00, 40),
+(1, 'Satara Rider', 'MH11TT1050', 'Non-AC Seater', 'Satara', 'Mumbai', '2026-11-13', '21:00:00', '03:00:00', 650.00, 45),
+(1, 'Goa Voyager', 'MH08TT1051', 'AC Seater', 'Goa', 'Kolhapur', '2026-11-13', '12:00:00', '18:00:00', 650.00, 40),
+
+-- November 14, 2026
+(1, 'Shivneri Links', 'MH12TT1052', 'AC Seater', 'Pune', 'Mumbai', '2026-11-14', '09:30:00', '14:00:00', 575.00, 40),
+(1, 'Nashik Express', 'MH15TT1053', 'AC Sleeper', 'Nashik', 'Pune', '2026-11-14', '21:30:00', '02:00:00', 650.00, 36),
+(1, 'Sangli Travels', 'MH10TT1054', 'Non-AC Seater', 'Sangli', 'Goa', '2026-11-14', '08:00:00', '14:00:00', 600.00, 45),
+
+-- November 15, 2026
+(1, 'Technitude Express', 'MH12TT1055', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-15', '23:00:00', '03:30:00', 675.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1056', 'AC Seater', 'Kolhapur', 'Mumbai', '2026-11-15', '20:00:00', '05:30:00', 850.00, 40),
+(1, 'Vidarbha Express', 'MH31TT1057', 'AC Seater', 'Nagpur', 'Pune', '2026-11-15', '06:00:00', '20:00:00', 1200.00, 40),
+
+-- November 16, 2026
+(1, 'Shivneri Links', 'MH12TT1058', 'AC Seater', 'Pune', 'Mumbai', '2026-11-16', '07:30:00', '12:00:00', 550.00, 40),
+(1, 'Satara Rider', 'MH11TT1059', 'AC Sleeper', 'Satara', 'Nagpur', '2026-11-16', '19:00:00', '09:00:00', 1250.00, 36),
+(1, 'Goa Voyager', 'MH08TT1060', 'Non-AC Seater', 'Goa', 'Pune', '2026-11-16', '20:00:00', '07:00:00', 900.00, 45),
+
+-- November 17, 2026
+(1, 'Technitude Express', 'MH12TT1061', 'AC Seater', 'Pune', 'Mumbai', '2026-11-17', '08:00:00', '12:30:00', 575.00, 40),
+(1, 'Nashik Express', 'MH15TT1062', 'AC Sleeper', 'Nashik', 'Mumbai', '2026-11-17', '21:00:00', '04:00:00', 750.00, 36),
+(1, 'Sangli Travels', 'MH10TT1063', 'AC Seater', 'Sangli', 'Pune', '2026-11-17', '12:00:00', '16:30:00', 450.00, 40),
+
+-- November 18, 2026
+(1, 'Shivneri Links', 'MH12TT1064', 'AC Sleeper', 'Pune', 'Mumbai', '2026-11-18', '22:30:00', '03:00:00', 675.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1065', 'Non-AC Seater', 'Kolhapur', 'Pune', '2026-11-18', '09:00:00', '14:00:00', 450.00, 45),
+(1, 'Vidarbha Express', 'MH31TT1066', 'AC Seater', 'Nagpur', 'Mumbai', '2026-11-18', '16:00:00', '08:00:00', 1300.00, 40),
+
+-- November 19, 2026
+(1, 'Technitude Express', 'MH12TT1067', 'AC Seater', 'Pune', 'Mumbai', '2026-11-19', '06:30:00', '11:00:00', 550.00, 40),
+(1, 'Satara Rider', 'MH11TT1068', 'AC Sleeper', 'Satara', 'Goa', '2026-11-19', '21:30:00', '04:30:00', 750.00, 36),
+(1, 'Nashik Express', 'MH15TT1069', 'AC Seater', 'Nashik', 'Pune', '2026-11-19', '10:00:00', '14:30:00', 500.00, 40),
+
+-- November 20, 2026
+(1, 'Shivneri Links', 'MH12TT1070', 'AC Seater', 'Pune', 'Mumbai', '2026-11-20', '07:00:00', '11:30:00', 575.00, 40),
+(1, 'Kolhapur Travels', 'MH09TT1071', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-11-20', '22:00:00', '06:00:00', 850.00, 36),
+(1, 'Goa Voyager', 'MH08TT1072', 'Non-AC Seater', 'Goa', 'Nagpur', '2026-11-20', '15:00:00', '07:00:00', 1400.00, 45);
