@@ -1087,7 +1087,7 @@
                 </li>
 
                 <li>
-                    <a href="manage-booking.html">
+                    <a href="bookings.html">
                         Manage Bookings
                     </a>
                 </li>
@@ -1099,11 +1099,9 @@
                 
                 </li>
                 
-
-<li>
-    <a href="AboutUs.html">About Us</a>
-</li>
-
+                <li>
+                    <a href="AboutUs.html">About Us</a>
+                </li>
 
                 <li id="navLoginItem">
                     <a href="login.html" class="login-button">
@@ -2029,21 +2027,15 @@
             .addEventListener(
                 "submit",
                 async function(event) {
-
                     event.preventDefault();
-
                     const from =
                         document.getElementById("origin").value;
-
                     const to =
                         document.getElementById("destination").value;
-
                     const journey =
                         document.getElementById("journeyDate").value;
-
                     const results =
                         document.getElementById("busResults");
-
 
                     /* VALIDATION */
 
@@ -2057,13 +2049,11 @@
                                 </p>
                             </div>
                         `;
-
                         return;
                     }
 
 
                     if (from === to) {
-
                         results.innerHTML = `
                             <div class="no-buses">
                                 <h3>Invalid Route</h3>
@@ -2072,7 +2062,6 @@
                                 </p>
                             </div>
                         `;
-
                         return;
                     }
 
@@ -2088,14 +2077,21 @@
 
 
                     try {
-
                         /* NODE.JS API */
-                        const dateInput = document.querySelector( 'input[type="date"]' );
-                        const date = dateInput ? dateInput.value : '';
-                        if (!date) { results.innerHTML = ` <div class="no-buses"> <h3>Select Journey Date</h3> <p>Please select your journey date.</p> </div> `; return; }
-                        const response = await fetch( `http://localhost:3000/api/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}` );
-                        const buses =
-                            await response.json();
+                        if (!journey) { 
+                            results.innerHTML = `
+                                <div class="no-buses">
+                                    <h3>Select Journey Date</h3>
+                                    <p>Please select your journey date.</p>
+                                </div>
+                            `; 
+                            return; 
+                        }
+
+                        const response = await fetch(
+                            `http://localhost:3000/api/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(journey)}`
+                        );
+                        const buses = await response.json();
 
 
                         /* API ERROR */
@@ -2218,18 +2214,9 @@
 
                                             </div>
 
-
-                                            <div class="bus-seats">
-
-                                                ${bus.seats_available}
-                                                Seats Available
-
-                                            </div>
-
-
-                                           <button class="book-btn" onclick="bookBus(${bus.id})">
-    Book Now
-</button>
+                                            <button class="book-btn" onclick="bookBus(${bus.bus_id})">
+                                                Book Now
+                                            </button>
                                         </div>
 
                                     `;
@@ -2465,5 +2452,4 @@ function bookBus(busId) {
     </script>
 
 </body>
-
 </html>
