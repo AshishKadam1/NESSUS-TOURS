@@ -8,7 +8,6 @@
     <title>Available Buses - Technitude Tours & Travels</title>
 
     <style>
-
         :root {
             --primary: #087e8b;
             --primary-dark: #065a63;
@@ -33,109 +32,44 @@
             color: var(--text);
         }
 
-        /* NAVBAR */
-
-        .navbar {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-
-            padding: 16px 6%;
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            color: var(--primary);
-            font-size: 24px;
-            font-weight: 800;
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 25px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 600;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
         /* MAIN */
 
         .container {
             width: 92%;
             max-width: 1200px;
-
-            margin: 35px auto 60px;
+            margin: 40px auto;
         }
-
-        .back {
-            display: inline-block;
-
-            margin-bottom: 20px;
-
-            color: var(--primary-dark);
-
-            text-decoration: none;
-
-            font-weight: 700;
-        }
-
         /* ROUTE */
 
         .route-box {
             background: var(--white);
-
             border: 1px solid var(--border);
-
             border-radius: 16px;
-
             padding: 22px;
-
             margin-bottom: 25px;
-
             box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
         }
 
         .route {
             display: flex;
-
             align-items: center;
-
             gap: 15px;
-
             flex-wrap: wrap;
         }
 
         .route strong {
             font-size: 22px;
-
             color: var(--dark);
         }
 
         .arrow {
             color: var(--primary);
-
             font-size: 25px;
-
             font-weight: bold;
         }
 
         .date {
             margin-top: 8px;
-
             color: #667780;
         }
 
@@ -143,7 +77,6 @@
 
         h1 {
             margin-bottom: 20px;
-
             color: var(--dark);
         }
 
@@ -151,7 +84,6 @@
 
         #busList {
             display: grid;
-
             gap: 18px;
         }
 
@@ -159,43 +91,32 @@
 
         .bus-card {
             background: var(--white);
-
             border: 1px solid var(--border);
-
             border-radius: 16px;
-
             padding: 22px;
-
             box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
         }
 
         .bus-top {
             display: flex;
-
             justify-content: space-between;
-
             align-items: flex-start;
-
             gap: 20px;
         }
 
         .bus-name {
             color: var(--secondary);
-
             font-size: 20px;
-
             font-weight: 800;
         }
 
         .bus-number {
             margin-top: 6px;
-
             color: #657780;
         }
 
         .bus-type {
             margin-top: 6px;
-
             color: #657780;
         }
 
@@ -203,31 +124,24 @@
 
         .times {
             display: flex;
-
             align-items: center;
-
             gap: 25px;
-
             margin: 22px 0;
         }
 
         .time-block strong {
             display: block;
-
             font-size: 23px;
-
             color: var(--dark);
         }
 
         .time-block span {
             color: #667780;
-
             font-size: 14px;
         }
 
         .duration {
             color: var(--primary);
-
             font-weight: 700;
         }
 
@@ -235,53 +149,30 @@
 
         .bus-bottom {
             border-top: 1px solid var(--border);
-
             padding-top: 18px;
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             gap: 15px;
-
             flex-wrap: wrap;
         }
 
         .price {
             font-size: 24px;
-
             font-weight: 800;
-
             color: var(--dark);
-        }
-
-        .seats {
-            color: #28733e;
-
-            font-weight: 700;
-
-            margin-top: 4px;
         }
 
         /* BUTTON */
 
         .seat-btn {
             border: none;
-
             background: var(--primary);
-
             color: white;
-
             padding: 12px 22px;
-
             border-radius: 8px;
-
             cursor: pointer;
-
             font-weight: 700;
-
             font-size: 15px;
         }
 
@@ -293,38 +184,26 @@
 
         .message {
             background: white;
-
             border: 1px solid var(--border);
-
             border-radius: 14px;
-
             padding: 35px;
-
             text-align: center;
-
             color: #657780;
         }
 
         .message h3 {
             color: var(--dark);
-
             margin-bottom: 10px;
         }
 
         .loading {
             text-align: center;
-
             padding: 40px;
         }
 
         /* MOBILE */
 
         @media (max-width: 700px) {
-
-            .nav-links {
-                display: none;
-            }
-
             .bus-top {
                 flex-direction: column;
             }
@@ -344,50 +223,12 @@
 
 <body>
 
-    <!-- NAVBAR -->
-
-    <nav class="navbar">
-
-        <a href="home.html" class="logo">
-            Technitude Tours & Travels
-        </a>
-
-        <div class="nav-links">
-
-            <a href="home.html">
-                Home
-            </a>
-
-            <a href="bookings.html">
-                My Bookings
-            </a>
-
-            <a href="contact.html">
-                Contact
-            </a>
-
-            <a href="login.html">
-                Login
-            </a>
-
-        </div>
-
-    </nav>
-
-
     <!-- MAIN -->
 
     <main class="container">
-
-        <a href="home.html" class="back">
-            ← Back to Search
-        </a>
-
-
         <!-- ROUTE -->
 
         <div class="route-box">
-
             <div class="route">
 
                 <strong id="fromCity">
@@ -406,17 +247,13 @@
 
 
             <div class="date">
-
                 Journey Date:
-
                 <strong id="journeyDate">
                     -
                 </strong>
-
             </div>
 
         </div>
-
 
         <h1>
             Available Technitude Buses
@@ -426,30 +263,22 @@
         <!-- BUS RESULTS -->
 
         <div id="busList">
-
             <div class="loading">
                 Loading buses...
             </div>
-
         </div>
-
     </main>
 
 
     <script>
-
         /* GET SEARCH PARAMETERS */
 
         const params =
             new URLSearchParams(window.location.search);
-
-
         const from =
             params.get("from");
-
         const to =
             params.get("to");
-
         const date =
             params.get("date");
 
@@ -458,13 +287,11 @@
 
         document.getElementById("fromCity").textContent =
             from || "-";
-
         document.getElementById("toCity").textContent =
             to || "-";
 
 
         /* DISPLAY DATE */
-
         if (date) {
 
             const d =
@@ -481,12 +308,8 @@
                     }
                 );
         }
-
-
         const busList =
             document.getElementById("busList");
-
-
         /* CHECK SEARCH */
 
         if (!from || !to || !date) {
@@ -505,14 +328,9 @@
                     </p>
 
                 </div>
-
             `;
-
-        } else {
-
-
+            } else {
             /* CALL NODE.JS API */
-
             fetch(
                 "/api/buses?from=" +
                 encodeURIComponent(from) +
@@ -537,12 +355,8 @@
                 return response.json();
 
             })
-
             .then(buses => {
-
-
                 /* NO BUS */
-
                 if (
                     !Array.isArray(buses) ||
                     buses.length === 0
@@ -573,8 +387,7 @@
                 /* CLEAR LOADING */
 
                 busList.innerHTML = "";
-
-window.availableBuses = buses;
+                window.availableBuses = buses;
                 /* CREATE BUS CARDS */
 
                 buses.forEach(bus => {
@@ -584,7 +397,6 @@ window.availableBuses = buses;
 
                     card.className =
                         "bus-card";
-
 
                     card.innerHTML = `
 
@@ -692,20 +504,12 @@ window.availableBuses = buses;
 
                                 </div>
 
-
-                                <div class="seats">
-
-                                    ${bus.total_seats}
-                                    seats
-
-                                </div>
-
                             </div>
 
 
                             <button
                                 class="seat-btn"
-                                onclick="viewSeats(${bus.id})">
+                                onclick="viewSeats(${bus.bus_id})">
 
                                 View Seats
 
@@ -722,17 +526,10 @@ window.availableBuses = buses;
                 });
 
             })
-
-
             /* ERROR */
-
             .catch(error => {
-
                 console.error(error);
-
-
                 busList.innerHTML = `
-
                     <div class="message">
 
                         <h3>
@@ -752,79 +549,91 @@ window.availableBuses = buses;
                         </p>
 
                     </div>
-
                 `;
+            });
+        }
+        /* VIEW SEATS */
+        function viewSeats(busId) {
+            const selectedBus = window.availableBuses?.find(
+                bus => String(bus.id || bus.bus_id) === String(busId)
+            );
 
+            if (!selectedBus) {
+                console.error("Bus not found:", busId);
+                alert("Bus details not found. Please refresh and try again.");
+                return;
+            }
+
+            const busIdValue = selectedBus.id || selectedBus.bus_id;
+
+            const params = new URLSearchParams({
+                bus_id: busIdValue,
+                bus_name: selectedBus.bus_name || "",
+                bus_type: selectedBus.bus_type || "",
+                from: selectedBus.from_city || from || "",
+                to: selectedBus.to_city || to || "",
+                date: selectedBus.journey_date || date || "",
+                price: selectedBus.price || 0,
+                total_seats: selectedBus.total_seats || 30
             });
 
+            window.location.href =
+                "seat-selection.html?" + params.toString();
         }
+        /* FORMAT TIME */
+        function formatTime(time) {
 
- 
-/* VIEW SEATS */
+            if (!time) {
 
-function viewSeats(busId) {
-    const selectedBus = window.availableBuses?.find(
-        bus => String(bus.id) === String(busId)
-    );
+                return "-";
 
-    if (!selectedBus) {
-        console.error("Bus not found:", busId);
-        alert("Bus details not found. Please refresh and try again.");
-        return;
-    }
-    console.log("Bus journey_date:", selectedBus.journey_date);
-console.log("Journey date type:", typeof selectedBus.journey_date);
+            }
+            const parts =
+                String(time).split(":");
+            let hour =
+                Number(parts[0]);
+            const minute =
+                parts[1] || "00";
+            const ampm =
+                hour >= 12
+                    ? "PM"
+                    : "AM";
+            hour =
+                hour % 12 || 12;
+            return (
+                hour +
+                ":" +
+                minute +
+                " " +
+                ampm
+            );
 
-    const query = new URLSearchParams({
-        bus_id: selectedBus.id,
-        bus_name: selectedBus.bus_name,
-        from: selectedBus.from_city,
-        to: selectedBus.to_city,
-        date: String(selectedBus.journey_date).slice(0, 10),
-        price: selectedBus.price,
-        total_seats: selectedBus.total_seats
-    });
+        }
+        /* SECURITY */
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
 
-    window.location.href =
-        `seat-selection.html?${query.toString()}`;
-}
-
-
-/* FORMAT TIME */
-
-function formatTime(time) {
-    if (!time) {
-        return "-";
-    }
-
-    const parts = String(time).split(":");
-    let hour = Number(parts[0]);
-    const minute = parts[1] || "00";
-
-    const ampm = hour >= 12 ? "PM" : "AM";
-    hour = hour % 12 || 12;
-
-    return hour + ":" + minute + " " + ampm;
-}
-
-
-/* SECURITY */
-
-function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, function (char) {
-        const entities = {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        };
-
-        return entities[char];
-    });
-}
+        }
     </script>
-
 </body>
-
 </html>
