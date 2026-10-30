@@ -14,7 +14,7 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
+ALTER TABLE bookings DROP CHECK bookings_chk_1;
 -- 2. Buses Table
 CREATE TABLE buses (
     bus_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -47,7 +47,6 @@ CREATE TABLE bookings (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (bus_id) REFERENCES buses(bus_id) ON DELETE CASCADE,
 
-    CHECK (seats_booked > 0),
     CHECK (total_amount >= 0)
 );
 
@@ -67,15 +66,11 @@ CREATE TABLE support_messages (
     FOREIGN KEY (parent_id) REFERENCES support_messages(message_id) ON DELETE CASCADE
 );
 
--- ==========================================
 -- SEED DATA: Insert Default Operator User
--- ==========================================
 INSERT INTO users (user_id, full_name, email, phone, password_hash, role) VALUES 
 (1, 'Technitude Operator', 'operator@technitude.com', '9876543210', '$2b$10$placeholderhashforsecurelogin', 'OPERATOR');
 
--- ==========================================
 -- SEED DATA: Bus Schedules (Oct 28 - Nov 20)
--- ==========================================
 INSERT INTO buses 
 (operator_id, bus_name, bus_number, bus_type, from_city, to_city, journey_date, departure_time, arrival_time, price, total_seats) 
 VALUES 
@@ -198,3 +193,6 @@ VALUES
 (1, 'Shivneri Links', 'MH12TT1070', 'AC Seater', 'Pune', 'Mumbai', '2026-11-20', '07:00:00', '11:30:00', 575.00, 40),
 (1, 'Kolhapur Travels', 'MH09TT1071', 'AC Sleeper', 'Kolhapur', 'Mumbai', '2026-11-20', '22:00:00', '06:00:00', 850.00, 36),
 (1, 'Goa Voyager', 'MH08TT1072', 'Non-AC Seater', 'Goa', 'Nagpur', '2026-11-20', '15:00:00', '07:00:00', 1400.00, 45);
+
+SELECT * FROM bookings;
+ALTER TABLE bookings MODIFY COLUMN seats_booked VARCHAR(100);
