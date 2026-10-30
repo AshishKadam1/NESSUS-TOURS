@@ -4,10 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account - Nessus Tours & Travels</title>
-
+    <title>Account - Technitude Tours & Travels</title>
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -31,225 +29,36 @@
             background: var(--light);
             color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             position: relative;
         }
 
-        /* ================= HEADER ================= */
-
-        header {
-            width: 100%;
-            height: 82px;
-            background: white;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.10);
+        /* ================= DYNAMIC BACKGROUND FRAME ================= */
+        #bgFrame {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000;
-        }
-
-        .navbar {
-            max-width: 1250px;
-            height: 82px;
-            margin: auto;
-            padding: 0 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00b4d8, #087e8b);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 800;
-            font-size: 16px;
-            border: 4px solid white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
-        }
-
-        .logo-main {
-            display: block;
-            color: var(--secondary);
-            font-size: 19px;
-            font-weight: 800;
-        }
-
-        .logo-sub {
-            display: block;
-            color: var(--primary);
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--dark);
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .login-button {
-            background: var(--primary);
-            color: white !important;
-            padding: 12px 25px;
-            border-radius: 25px;
-        }
-
-        /* ================= HERO ================= */
-
-        .hero {
-            height: 555px;
-            margin-top: 82px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-
-            background-image:
-                linear-gradient(
-                    90deg,
-                    rgba(255, 255, 255, 0.80) 0%,
-                    rgba(255, 255, 255, 0.48) 38%,
-                    rgba(255, 255, 255, 0.08) 75%
-                ),
-                url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=90");
-
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 120px;
-
-            background:
-                linear-gradient(
-                    transparent,
-                    rgba(245, 249, 250, 0.98)
-                );
-
-            z-index: 2;
-        }
-
-        .hero-content {
-            width: 1200px;
-            max-width: 90%;
-            margin: auto;
-            position: relative;
-            z-index: 5;
-            padding-bottom: 50px;
-        }
-
-        .hero-content h1 {
-            font-size: 58px;
-            line-height: 1.1;
-            max-width: 750px;
-            color: #073b4c;
-            font-weight: 800;
-            margin-bottom: 18px;
-        }
-
-        .hero-content p {
-            font-size: 21px;
-            max-width: 650px;
-            color: #15566b;
-            margin-bottom: 28px;
-            font-weight: 500;
-        }
-
-        /* ================= SEARCH ================= */
-
-        .search-box {
-            width: min(94%, 1150px);
-            margin: -55px auto 60px;
-            position: relative;
-            z-index: 1;
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-
-            display: grid;
-            grid-template-columns: 1.2fr 50px 1.2fr 1fr 1fr 170px;
-            gap: 10px;
-            align-items: end;
-
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
-
-        .search-item label {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: #52656e;
-            margin-bottom: 7px;
-        }
-
-        .search-item select,
-        .search-item input {
             width: 100%;
-            height: 53px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0 15px;
-            background: white;
-        }
-
-        .search-btn {
-            height: 53px;
+            height: 100%;
             border: none;
-            border-radius: 28px;
-            background: var(--primary);
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
+            z-index: 1;
+            pointer-events: none;
         }
 
         /* ================= MODAL ================= */
-
         .login-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-
-            background: rgba(11, 48, 65, 0.45);
-            backdrop-filter: blur(2px);
-
+            background: rgba(11, 48, 65, 0.55);
+            backdrop-filter: blur(3px);
             z-index: 1000;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             padding: 20px;
-
             cursor: pointer;
         }
 
@@ -257,56 +66,43 @@
             width: min(100%, 450px);
             max-height: 92vh;
             overflow-y: auto;
-
             background: var(--white);
             border-radius: 20px;
             padding: 36px 32px;
-
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-
             border: 1px solid var(--border);
             text-align: center;
-
             position: relative;
-
             cursor: default;
-
             animation: modalFadeIn 0.3s ease-out;
+            z-index: 1001;
         }
 
         @keyframes modalFadeIn {
-
             from {
                 opacity: 0;
                 transform: translateY(-20px) scale(0.96);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
-
         }
 
         .close-btn {
             position: absolute;
             top: 16px;
             right: 20px;
-
             background: none;
             border: none;
-
             color: #8fa0a8;
             font-size: 26px;
             font-weight: bold;
-
             line-height: 1;
-
             cursor: pointer;
         }
 
         /* ================= FORM ================= */
-
         .form-view {
             display: none;
         }
@@ -345,19 +141,13 @@
         .form-group select {
             width: 100%;
             height: 48px;
-
             border: 1px solid var(--border);
             border-radius: 10px;
-
             padding: 0 14px;
-
             background: var(--white);
             color: var(--dark);
-
             outline: none;
-
             font-size: 14px;
-
             transition: 0.3s;
         }
 
@@ -371,9 +161,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-
             margin-bottom: 22px;
-
             font-size: 13px;
         }
 
@@ -381,20 +169,16 @@
             display: flex;
             align-items: center;
             gap: 6px;
-
             color: #52656e;
             cursor: pointer;
         }
 
         .link-btn {
             color: var(--primary);
-
             background: none;
             border: none;
-
             font-size: 13px;
             font-weight: 700;
-
             cursor: pointer;
             padding: 0;
         }
@@ -402,18 +186,13 @@
         .submit-btn {
             width: 100%;
             height: 50px;
-
             border: none;
             border-radius: 25px;
-
             background: var(--primary);
             color: white;
-
             font-size: 15px;
             font-weight: 700;
-
             cursor: pointer;
-
             transition: 0.3s;
         }
 
@@ -425,7 +204,6 @@
 
         .form-footer {
             margin-top: 22px;
-
             font-size: 14px;
             color: #687a82;
         }
@@ -436,966 +214,262 @@
             margin-top: 6px;
             line-height: 1.4;
         }
-
-        @media (max-width: 800px) {
-
-            .nav-links {
-                gap: 12px;
-            }
-
-            .nav-links li:not(:last-child) {
-                display: none;
-            }
-
-            .hero-content h1 {
-                font-size: 42px;
-            }
-
-            .search-box {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
     </style>
 </head>
 
-
 <body>
 
-
-    <!-- ================= HOME BACKGROUND ================= -->
-
-    <div class="bg-home-wrapper">
-
-        <header>
-
-            <nav class="navbar">
-
-                <a href="#" class="logo">
-
-                    <div class="logo-icon">
-                        NT
-                    </div>
-
-                    <div class="logo-text">
-
-                        <span class="logo-main">
-                            NESSUS TOURS
-                        </span>
-
-                        <span class="logo-sub">
-                            & TRAVELS
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-                <ul class="nav-links">
-
-                    <li>
-                        <a href="#">
-                            Home
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#">
-                            Manage Bookings
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#">
-                            Contact
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#" class="login-button">
-                            Login
-                        </a>
-                    </li>
-
-                </ul>
-
-            </nav>
-
-        </header>
-
-
-        <!-- ================= HERO ================= -->
-
-        <section class="hero">
-
-            <div class="hero-content">
-
-                <h1>
-                    Travel With Comfort
-                </h1>
-
-                <p>
-                    Book your journey with Nessus Tours & Travels
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= SEARCH BOX ================= -->
-
-        <form class="search-box">
-
-            <div class="search-item">
-
-                <label>
-                    From
-                </label>
-
-                <select>
-
-                    <option>
-                        Select city
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div style="text-align: center; font-size: 20px; color: #087e8b;">
-                ⇄
-            </div>
-
-
-            <div class="search-item">
-
-                <label>
-                    To
-                </label>
-
-                <select>
-
-                    <option>
-                        Select city
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="search-item">
-
-                <label>
-                    Journey Date
-                </label>
-
-                <input type="date">
-
-            </div>
-
-
-            <div class="search-item">
-
-                <label>
-                    Return
-                </label>
-
-                <input type="date">
-
-            </div>
-
-
-            <button
-                type="button"
-                class="search-btn">
-
-                Search Buses
-
-            </button>
-
-        </form>
-
-    </div>
-
+    <!-- ================= DYNAMIC BACKGROUND ================= -->
+    <iframe id="bgFrame" aria-hidden="true"></iframe>
 
     <!-- ================= LOGIN MODAL ================= -->
-
-    <div
-        class="login-overlay"
-        onclick="goToPreviousPage()">
-
-
-        <div
-            class="login-card"
-            onclick="event.stopPropagation()">
-
-
-            <button
-                type="button"
-                class="close-btn"
-                onclick="goToPreviousPage()"
-                title="Close">
-
-                &times;
-
-            </button>
-
+    <div class="login-overlay" onclick="goToPreviousPage()">
+        <div class="login-card" onclick="event.stopPropagation()">
+            <button type="button" class="close-btn" onclick="goToPreviousPage()" title="Close">&times;</button>
 
             <!-- ================= LOGIN ================= -->
-
-            <div
-                id="loginView"
-                class="form-view active">
-
-
+            <div id="loginView" class="form-view active">
                 <div class="login-header">
-
-                    <h2>
-                        Welcome Back
-                    </h2>
-
-                    <p>
-                        Sign in to manage your travel bookings
-                    </p>
-
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to manage your travel bookings</p>
                 </div>
-
-
                 <form onsubmit="handleAuthSubmit(event)">
-
-
                     <div class="form-group">
-
-                        <label for="loginEmail">
-                            Email or Mobile Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="loginEmail"
-                            placeholder="Enter email or mobile"
-                            required>
-
+                        <label for="loginEmail">Email or Mobile Number</label>
+                        <input type="text" id="loginEmail" placeholder="Enter email or mobile" required>
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="loginPassword">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="loginPassword"
-                            placeholder="Enter password"
-                            required>
-
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" required>
                     </div>
-
-
                     <div class="form-options">
-
                         <label class="remember-me">
-
-                            <input type="checkbox">
-
-                            Remember me
-
+                            <input type="checkbox"> Remember me
                         </label>
-
-
-                        <button
-                            type="button"
-                            class="link-btn"
-                            onclick="switchView('forgotView')">
-
-                            Forgot Password?
-
-                        </button>
-
+                        <button type="button" class="link-btn" onclick="switchView('forgotView')">Forgot Password?</button>
                     </div>
-
-
-                    <button
-                        type="submit"
-                        class="submit-btn">
-
-                        Login
-
-                    </button>
-
+                    <button type="submit" class="submit-btn">Login</button>
                 </form>
-
-
                 <div class="form-footer">
-
                     Don't have an account?
-
-                    <button
-                        type="button"
-                        class="link-btn"
-                        onclick="switchView('registerView')">
-
-                        Register Now
-
-                    </button>
-
+                    <button type="button" class="link-btn" onclick="switchView('registerView')">Register Now</button>
                 </div>
-
             </div>
-
 
             <!-- ================= REGISTER ================= -->
-
-            <div
-                id="registerView"
-                class="form-view">
-
-
+            <div id="registerView" class="form-view">
                 <div class="login-header">
-
-                    <h2>
-                        Create Account
-                    </h2>
-
-                    <p>
-                        Sign up to use Nessus Tours & Travels
-                    </p>
-
+                    <h2>Create Account</h2>
+                    <p>Sign up to use Technitude Tours & Travels</p>
                 </div>
-
-
                 <form onsubmit="handleAuthSubmit(event)">
-
-
-                    <!-- FULL NAME -->
-
                     <div class="form-group">
-
-                        <label for="regName">
-                            Full Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="regName"
-                            placeholder="Enter your full name"
-                            required>
-
+                        <label for="regName">Full Name</label>
+                        <input type="text" id="regName" placeholder="Enter your full name" required>
                     </div>
-
-
-                    <!-- EMAIL -->
-
                     <div class="form-group">
-
-                        <label for="regEmail">
-                            Email Address
-                        </label>
-
-                        <input
-                            type="email"
-                            id="regEmail"
-                            placeholder="Enter email address"
-                            required>
-
+                        <label for="regEmail">Email Address</label>
+                        <input type="email" id="regEmail" placeholder="Enter email address" required>
                     </div>
-
-
-                    <!-- PHONE -->
-
                     <div class="form-group">
-
-                        <label for="regPhone">
-                            Mobile Number
-                        </label>
-
-                        <input
-                            type="tel"
-                            id="regPhone"
-                            placeholder="Enter 10-digit mobile number"
-                            maxlength="10"
-                            required>
-
+                        <label for="regPhone">Mobile Number</label>
+                        <input type="tel" id="regPhone" placeholder="Enter 10-digit mobile number" maxlength="10" required>
                     </div>
-
-
-                    <!-- ROLE -->
-
                     <div class="form-group">
-
-                        <label for="regRole">
-                            Account Type
-                        </label>
-
-                        <select
-                            id="regRole"
-                            required>
-
-                            <option value="" disabled selected>
-                                Select account type
-                            </option>
-
-                            <option value="CUSTOMER">
-                                Customer / User
-                            </option>
-
-                            <option value="AGENT">
-                                Agent
-                            </option>
-
-                            <option value="OPERATOR">
-                                Bus Operator
-                            </option>
-
-                            <option value="SUPPORT">
-                                Support Staff
-                            </option>
-
+                        <label for="regRole">Account Type</label>
+                        <select id="regRole" required>
+                            <option value="" disabled selected>Select account type</option>
+                            <option value="CUSTOMER">Customer / User</option>
+                            <option value="AGENT">Agent</option>
+                            <option value="OPERATOR">Bus Operator</option>
+                            <option value="SUPPORT">Support Staff</option>
                         </select>
-
-
-                        <div class="role-description">
-                            Select the type of account you want to register.
-                        </div>
-
+                        <div class="role-description">Select the type of account you want to register.</div>
                     </div>
-
-
-                    <!-- PASSWORD -->
-
                     <div class="form-group">
-
-                        <label for="regPassword">
-                            Create Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="regPassword"
-                            placeholder="Create a strong password"
-                            required>
-
+                        <label for="regPassword">Create Password</label>
+                        <input type="password" id="regPassword" placeholder="Create a strong password" required>
                     </div>
-
-
-                    <button
-                        type="submit"
-                        class="submit-btn">
-
-                        Register
-
-                    </button>
-
+                    <button type="submit" class="submit-btn">Register</button>
                 </form>
-
-
                 <div class="form-footer">
-
                     Already have an account?
-
-                    <button
-                        type="button"
-                        class="link-btn"
-                        onclick="switchView('loginView')">
-
-                        Login Here
-
-                    </button>
-
+                    <button type="button" class="link-btn" onclick="switchView('loginView')">Login Here</button>
                 </div>
-
             </div>
-
 
             <!-- ================= FORGOT PASSWORD ================= -->
-
-            <div
-                id="forgotView"
-                class="form-view">
-
-
+            <div id="forgotView" class="form-view">
                 <div class="login-header">
-
-                    <h2>
-                        Reset Password
-                    </h2>
-
-                    <p>
-                        Enter your email to receive recovery instructions
-                    </p>
-
+                    <h2>Reset Password</h2>
+                    <p>Enter your email to receive recovery instructions</p>
                 </div>
-
-
                 <form onsubmit="handleAuthSubmit(event)">
-
-
                     <div class="form-group">
-
-                        <label for="resetEmail">
-                            Registered Email
-                        </label>
-
-                        <input
-                            type="email"
-                            id="resetEmail"
-                            placeholder="Enter your registered email"
-                            required>
-
+                        <label for="resetEmail">Registered Email</label>
+                        <input type="email" id="resetEmail" placeholder="Enter your registered email" required>
                     </div>
-
-
-                    <button
-                        type="submit"
-                        class="submit-btn">
-
-                        Send Reset Link
-
-                    </button>
-
+                    <button type="submit" class="submit-btn">Send Reset Link</button>
                 </form>
-
-
                 <div class="form-footer">
-
                     Remembered password?
-
-                    <button
-                        type="button"
-                        class="link-btn"
-                        onclick="switchView('loginView')">
-
-                        Back to Login
-
-                    </button>
-
+                    <button type="button" class="link-btn" onclick="switchView('loginView')">Back to Login</button>
                 </div>
-
             </div>
-
-
         </div>
-
     </div>
 
-
     <!-- ================= JAVASCRIPT ================= -->
-
     <script>
-
+        /* ================= LOAD DYNAMIC BACKGROUND ================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            const referrer = document.referrer;
+            const bgFrame = document.getElementById('bgFrame');
+            
+            if (referrer && referrer.includes(window.location.hostname) && !referrer.includes('login.html')) {
+                bgFrame.src = referrer;
+            } else {
+                bgFrame.src = 'home.html';
+            }
+        });
 
         /* ================= GO HOME ================= */
-
         function goToPreviousPage() {
-
-            window.location.href = 'home.html';
-
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.location.href = document.referrer;
+            } else {
+                window.location.href = 'home.html';
+            }
         }
-
 
         /* ================= SWITCH VIEW ================= */
-
         function switchView(viewId) {
-
-            const views =
-                document.querySelectorAll('.form-view');
-
+            const views = document.querySelectorAll('.form-view');
             views.forEach(function (view) {
-
                 view.classList.remove('active');
-
             });
-
-            document
-                .getElementById(viewId)
-                .classList.add('active');
-
+            document.getElementById(viewId).classList.add('active');
         }
-
 
         /* ================= AUTH SUBMIT ================= */
-
         async function handleAuthSubmit(event) {
-
             event.preventDefault();
-
             const form = event.target;
 
-
-            /* ==================================================
-               LOGIN
-            ================================================== */
-
+            /* ================= LOGIN ================= */
             if (form.closest('#loginView')) {
-
-                const emailOrMobile =
-                    document
-                        .getElementById('loginEmail')
-                        .value
-                        .trim();
-
-                const password =
-                    document
-                        .getElementById('loginPassword')
-                        .value;
-
+                const emailOrMobile = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
 
                 if (!emailOrMobile || !password) {
-
-                    alert(
-                        'Please enter your email/mobile and password.'
-                    );
-
+                    alert('Please enter your email/mobile and password.');
                     return;
-
                 }
-
 
                 if (!validateEmailOrMobile(emailOrMobile)) {
-
-                    alert(
-                        'Enter a valid email or 10-digit mobile number.'
-                    );
-
+                    alert('Enter a valid email or 10-digit mobile number.');
                     return;
-
                 }
 
-
                 try {
+                    const response = await fetch('http://localhost:3000/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ emailOrMobile, password })
+                    });
 
-                    const response =
-                        await fetch(
-                            'http://localhost:3000/api/login',
-                            {
-
-                                method: 'POST',
-
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-
-                                body: JSON.stringify({
-
-                                    emailOrMobile:
-                                        emailOrMobile,
-
-                                    password:
-                                        password
-
-                                })
-
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
-
+                    const data = await response.json();
 
                     if (data.success) {
-
-                        /*
-                        Store logged-in user information
-                        so other pages can identify the role.
-                        */
-
-                        localStorage.setItem(
-                            'loggedInUser',
-                            JSON.stringify(data.user)
-                        );
-
-
-                        alert(
-                            'Login successful!'
-                        );
-
-
-                        /*
-                        Later we can redirect users
-                        according to their role.
-                        */
+                        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+                        alert('Login successful!');
 
                         if (data.user.role === 'CUSTOMER') {
-
-                            window.location.href =
-                                'home.html';
-
+                            window.location.href = 'home.html';
+                        } else if (data.user.role === 'AGENT') {
+                            window.location.href = 'agent-dashboard.html';
+                        } else if (data.user.role === 'OPERATOR') {
+                            window.location.href = 'operator-dashboard.html';
+                        } else if (data.user.role === 'SUPPORT' || data.user.role === 'ADMIN') {
+                            window.location.href = 'support.html';
                         }
-
-                        else if (data.user.role === 'AGENT') {
-
-                            window.location.href =
-                                'agent-dashboard.html';
-
-                        }
-
-                        else if (data.user.role === 'OPERATOR') {
-
-                            window.location.href =
-                                'operator-dashboard.html';
-
-                        }
-
-                        else if (data.user.role === 'SUPPORT'|| data.user.role === 'ADMIN') {
-
-                            window.location.href =
-                                'support.html';
-
-                        }
-
-                    }
-
-                    else {
-
+                    } else {
                         alert(data.message);
-
                     }
-
-                }
-
-                catch (error) {
-
+                } catch (error) {
                     console.error(error);
-
-                    alert(
-                        'Unable to connect to the server.'
-                    );
-
+                    alert('Unable to connect to the server.');
                 }
-
-
                 return;
-
             }
 
-
-            /* ==================================================
-               REGISTER
-            ================================================== */
-
+            /* ================= REGISTER ================= */
             if (form.closest('#registerView')) {
+                const fullName = document.getElementById('regName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const phone = document.getElementById('regPhone').value.trim();
+                const role = document.getElementById('regRole').value;
+                const password = document.getElementById('regPassword').value;
 
-                const fullName =
-                    document
-                        .getElementById('regName')
-                        .value
-                        .trim();
-
-                const email =
-                    document
-                        .getElementById('regEmail')
-                        .value
-                        .trim();
-
-                const phone =
-                    document
-                        .getElementById('regPhone')
-                        .value
-                        .trim();
-
-                const role =
-                    document
-                        .getElementById('regRole')
-                        .value;
-
-                const password =
-                    document
-                        .getElementById('regPassword')
-                        .value;
-
-
-                /* REQUIRED FIELD VALIDATION */
-
-                if (
-                    !fullName ||
-                    !email ||
-                    !phone ||
-                    !role ||
-                    !password
-                ) {
-
-                    alert(
-                        'Please fill in all fields.'
-                    );
-
+                if (!fullName || !email || !phone || !role || !password) {
+                    alert('Please fill in all fields.');
                     return;
-
                 }
-
-
-                /* PHONE VALIDATION */
 
                 if (!/^\d{10}$/.test(phone)) {
-
-                    alert(
-                        'Please enter a valid 10-digit mobile number.'
-                    );
-
+                    alert('Please enter a valid 10-digit mobile number.');
                     return;
-
                 }
 
-
-                /* EMAIL VALIDATION */
-
-                const emailRegex =
-                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-
-                    alert(
-                        'Please enter a valid email address.'
-                    );
-
+                    alert('Please enter a valid email address.');
                     return;
-
                 }
-
-
-                /* PASSWORD VALIDATION */
 
                 if (password.length < 6) {
-
-                    alert(
-                        'Password must contain at least 6 characters.'
-                    );
-
+                    alert('Password must contain at least 6 characters.');
                     return;
-
                 }
-
-
-                /* ==================================================
-                   SEND REGISTRATION REQUEST
-                ================================================== */
 
                 try {
+                    const response = await fetch('http://localhost:3000/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ full_name: fullName, email, phone, password, role })
+                    });
 
-                    const response =
-                        await fetch(
-                            'http://localhost:3000/api/register',
-                            {
-
-                                method: 'POST',
-
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-
-                                body: JSON.stringify({
-
-                                    full_name:
-                                        fullName,
-
-                                    email:
-                                        email,
-
-                                    phone:
-                                        phone,
-
-                                    password:
-                                        password,
-
-                                    role:
-                                        role
-
-                                })
-
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
-
+                    const data = await response.json();
 
                     if (data.success) {
-
-                        alert(
-                            'Registration successful! You can now login.'
-                        );
-
+                        alert('Registration successful! You can now login.');
                         form.reset();
-
-                        switchView(
-                            'loginView'
-                        );
-
+                        switchView('loginView');
+                    } else {
+                        alert(data.message);
                     }
-
-                    else {
-
-                        alert(
-                            data.message
-                        );
-
-                    }
-
-                }
-
-                catch (error) {
-
+                } catch (error) {
                     console.error(error);
-
-                    alert(
-                        'Unable to connect to the server.'
-                    );
-
+                    alert('Unable to connect to the server.');
                 }
-
-
                 return;
-
             }
 
-
-            /* ==================================================
-               FORGOT PASSWORD
-            ================================================== */
-
+            /* ================= FORGOT PASSWORD ================= */
             if (form.closest('#forgotView')) {
-
-                alert(
-                    'Password reset functionality will be added later.'
-                );
-
+                alert('Password reset functionality will be added later.');
             }
-
         }
-
 
         /* ================= VALIDATE LOGIN ================= */
-
         function validateEmailOrMobile(input) {
-
             if (input.includes('@')) {
-
-                const emailRegex =
-                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailRegex.test(input);
-
             }
-
-
-            const mobileRegex =
-                /^\d{10}$/;
-
+            const mobileRegex = /^\d{10}$/;
             return mobileRegex.test(input);
-
         }
-        
-
     </script>
-
 </body>
-
 </html>
