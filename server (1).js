@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const Razorpay = require('razorpay');
 const pool = require('./db');
  
 const app = express(); 
@@ -14,9 +15,7 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'frontend', 'home.html'));
 });
-// Serve frontend files from the frontend folder if present. 
-app.use(express.static(path.join(__dirname, '..', 'frontend'))); 
- 
+
 // Test API 
 app.get('/api/test', (req, res) => { 
     res.json({ 
@@ -25,20 +24,165 @@ app.get('/api/test', (req, res) => {
     }); 
 }); 
 
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_TqWKiwLDZP5zK2',      
+    key_secret: 'U6WBiiowM3NSLrbf9EHWkikR' 
+});
 
-function allowRoles(...allowedRoles) {
-    return (req, res, next) => {
-        const role = req.user?.role;
+// ==========================================
+// CORE USER & BOOKING API ROUTES (Placed at top to avoid 404/static conflicts)
+// ==========================================
 
-        if (!role || !allowedRoles.includes(role)) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied: insufficient permissions'
+// Save Booking API (Matches payload from payment.html)
+app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
+    try {
+        console.log("Received booking payload:", req.body);
+
+        const bus_id = req.body.bus_id || req.body.busId;
+        const journey_date = req.body.journey_date || req.body.date;
+        const seats_array = req.body.seats;
+        const seats_booked = Array.isArray(seats_array) ? seats_array.join(', ') : (req.body.seats_booked || seats_array);
+        const total_amount = req.body.total_amount || req.body.total || req.body.price;
+        
+        // Passenger & Payment info
+        const passenger_name = req.body.passenger_name || 'Guest';
+        const phone = req.body.phone || '';
+        const email = req.body.email || '';
+        const payment_id = req.body.payment_id || req.body.razorpay_payment_id || '';
+
+        let user_id = req.body.user_id || req.body.userId || req.headers['x-user-id'];
+        
+        if (!user_id && email) {
+            const [userRows] = await pool.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [email]);
+            if (userRows.length > 0) {
+                user_id = userRows[0].user_id;
+            }
+        }
+        if (!user_id) {
+            user_id = 1; // Fallback default user ID if none found
+        }
+
+        if (!bus_id || !seats_booked || !total_amount) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Missing required fields', 
+                received: req.body 
             });
         }
-        next();
-    };
-}
+
+        const booking_reference = 'TT-' + Math.floor(100000 + Math.random() * 900000);
+
+        const query = `
+            INSERT INTO bookings (
+                user_id, 
+                bus_id, 
+                booking_reference, 
+                journey_date, 
+                seats_booked, 
+                total_amount, 
+                booking_status, 
+                booking_time
+            )
+            VALUES (?, ?, ?, ?, ?, ?, 'CONFIRMED', NOW())
+        `;
+
+        const [result] = await pool.query(query, [
+            user_id, 
+            bus_id, 
+            booking_reference, 
+            journey_date || null, 
+            String(seats_booked), 
+            total_amount
+        ]);
+
+        return res.status(201).json({ 
+            success: true, 
+            message: 'Booking saved successfully', 
+            bookingId: result.insertId,
+            booking_id: result.insertId,
+            booking_reference 
+        });
+    } catch (error) {
+        console.error('Error saving booking:', error);
+        return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+    }
+});
+
+// Get Booked Seats for a Specific Bus & Date
+app.get('/api/buses/:id/booked-seats', async (req, res) => {
+    try {
+        const busId = req.params.id;
+        const { date } = req.query;
+
+        console.log(`Fetching booked seats for Bus ID: ${busId} on Date: ${date}`);
+
+        if (!date) {
+            return res.status(400).json({ success: false, message: 'Journey date is required' });
+        }
+
+        const [bookings] = await pool.query(
+            `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+            [busId, date]
+        );
+
+        // Extract and flatten all booked seats into a single array
+        const bookedSeats = [];
+        bookings.forEach(row => {
+            if (row.seats_booked) {
+                row.seats_booked.split(',').forEach(seat => {
+                    bookedSeats.push(seat.trim());
+                });
+            }
+        });
+
+        return res.json({ success: true, bookedSeats });
+    } catch (error) {
+        console.error('Error fetching booked seats:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Create Order API with Double-Booking Concurrency Check
+app.post('/api/create-order', async (req, res) => {
+    try {
+        const { amount, bus_id, date, seats } = req.body;
+
+        // 1. Concurrency Check: Verify if requested seats are already taken
+        if (bus_id && date && seats && Array.isArray(seats) && seats.length > 0) {
+            const [existingBookings] = await pool.query(
+                `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+                [bus_id, date]
+            );
+
+            const bookedSeatsSet = new Set();
+            existingBookings.forEach(row => {
+                if (row.seats_booked) {
+                    row.seats_booked.split(',').forEach(s => bookedSeatsSet.add(s.trim()));
+                }
+            });
+
+            const conflict = seats.some(seat => bookedSeatsSet.has(String(seat)));
+            if (conflict) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'One or more of your selected seats have just been booked by another user. Please go back and select different seats.' 
+                });
+            }
+        }
+
+        // 2. Proceed with Razorpay Order Creation if seats are available
+        const options = {
+            amount: Math.round(amount * 100), 
+            currency: "INR",
+            receipt: "receipt_order_" + Date.now()
+        };
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error("Razorpay order error:", error);
+        res.status(500).json({ success: false, message: "Failed to create order" });
+    }
+});
 
 // Registration API 
 app.post('/api/register', async (req, res) => { 
@@ -156,7 +300,7 @@ app.post('/api/login', async (req, res) => {
             success: true, 
             message: 'Login successful', 
             user: { 
-                id: user.user_id, // Kept as 'id' for frontend compatibility
+                id: user.user_id, 
                 user_id: user.user_id, 
                 full_name: user.full_name, 
                 email: user.email, 
@@ -172,7 +316,6 @@ app.post('/api/login', async (req, res) => {
         }); 
     } 
 }); 
- 
 // Bus Search API 
 app.get('/api/buses', async (req, res) => { 
     try { 
@@ -207,10 +350,36 @@ app.get('/api/buses', async (req, res) => {
  
         const [results] = await pool.query(sql, [from, to, date]); 
  
-        // Map bus_id to id for seamless frontend compatibility
-        const mappedResults = results.map(bus => ({
-            ...bus,
-            id: bus.bus_id
+        const mappedResults = await Promise.all(results.map(async (bus) => {
+            // Using the exact same query format as your working booked-seats route
+            const [bookings] = await pool.query(
+                `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+                [bus.bus_id, date]
+            );
+
+            // Extract and count booked seats using the exact same logic
+            const bookedSeats = [];
+            bookings.forEach(row => {
+                if (row.seats_booked) {
+                    row.seats_booked.split(',').forEach(seat => {
+                        const trimmed = seat.trim();
+                        if (trimmed) {
+                            bookedSeats.push(trimmed);
+                        }
+                    });
+                }
+            });
+
+            // Use Set to ensure unique seat counts
+            const bookedCount = new Set(bookedSeats).size;
+            const availableSeats = Math.max(0, bus.total_seats - bookedCount);
+
+            return {
+                ...bus,
+                id: bus.bus_id,
+                seats_available: availableSeats,
+                available_seats: availableSeats
+            };
         }));
 
         return res.json(mappedResults); 
@@ -220,14 +389,9 @@ app.get('/api/buses', async (req, res) => {
             message: 'Database error' 
         }); 
     } 
-}); 
-
-
-// ==========================================
+});
 // SUPPORT STAFF & CONTACT ENDPOINTS
-// ==========================================
 
-// 1. Public API: Save contact form submission (Main Inquiry)
 app.post('/api/contact', async (req, res) => {
     try {
         const { full_name, email, phone, subject, message } = req.body;
@@ -249,7 +413,6 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
-// 2. API: Get all main contact inquiries for Support Inbox (where parent_id IS NULL)
 app.get('/api/support/messages', async (req, res) => {
     try {
         const [messages] = await pool.query(
@@ -265,7 +428,6 @@ app.get('/api/support/messages', async (req, res) => {
     }
 });
 
-// 3. API: Get full conversation thread (Initial message + all replies) for a specific ID
 app.get('/api/support/messages/:id/thread', async (req, res) => {
     try {
         const messageId = req.params.id;
@@ -283,7 +445,6 @@ app.get('/api/support/messages/:id/thread', async (req, res) => {
     }
 });
 
-// 4. API: Send a reply (Supports both Support Staff and Customer replies)
 app.post('/api/support/messages/:id/reply', async (req, res) => {
     try {
         const messageId = req.params.id;
@@ -314,7 +475,6 @@ app.post('/api/support/messages/:id/reply', async (req, res) => {
     }
 });
 
-// 5. API: Get customer inquiries by email so they can view their tickets
 app.get('/api/user/inquiries', async (req, res) => {
     try {
         const { email } = req.query;
@@ -336,7 +496,6 @@ app.get('/api/user/inquiries', async (req, res) => {
     }
 });
 
-// 6. API: Mark a contact message as resolved
 app.patch('/api/support/messages/:id/resolve', async (req, res) => {
     try {
         const messageId = req.params.id;
@@ -360,7 +519,6 @@ function verifyOperator(req, res, next) {
     return res.status(403).json({ success: false, message: 'Access denied. Operators only.' });
 }
 
-// 1. Get Operator Dashboard Summary & Reports
 app.get('/api/operator/reports/summary', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -382,7 +540,6 @@ app.get('/api/operator/reports/summary', verifyOperator, async (req, res) => {
     }
 });
 
-// 2. Get Buses for the Logged-in Operator
 app.get('/api/operator/buses', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -394,7 +551,6 @@ app.get('/api/operator/buses', verifyOperator, async (req, res) => {
     }
 });
 
-// 3. Add a New Bus / Schedule Entry for the Operator
 app.post('/api/operator/buses', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -417,7 +573,6 @@ app.post('/api/operator/buses', verifyOperator, async (req, res) => {
     }
 });
 
-// 4. Get Schedules / Routes for the Operator's Fleet
 app.get('/api/operator/schedules', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -435,7 +590,6 @@ app.get('/api/operator/schedules', verifyOperator, async (req, res) => {
     }
 });
 
-// 5. Update Bus, Route, and Pricing Details for the Operator
 app.put('/api/operator/buses/:id', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -462,7 +616,6 @@ app.put('/api/operator/buses/:id', verifyOperator, async (req, res) => {
     }
 });
 
-// Update Bus Fleet Details & Price (Bus Management)
 app.put('/api/operator/buses/:id/fleet', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -482,7 +635,6 @@ app.put('/api/operator/buses/:id/fleet', verifyOperator, async (req, res) => {
     }
 });
 
-// Update Route & Schedule Details Only (Routes & Schedules)
 app.put('/api/operator/buses/:id/route', verifyOperator, async (req, res) => {
     try {
         const operatorId = req.headers['x-user-id'];
@@ -502,7 +654,6 @@ app.put('/api/operator/buses/:id/route', verifyOperator, async (req, res) => {
     }
 });
 
-// 1. Get User's Bookings
 app.get('/api/user/bookings', async (req, res) => {
     try {
         const userId = req.headers['x-user-id'];
@@ -539,7 +690,6 @@ app.get('/api/user/bookings', async (req, res) => {
     }
 });
 
-// 2. Cancel Booking API
 app.patch('/api/user/bookings/:id/cancel', async (req, res) => {
     try {
         const bookingId = req.params.id;
@@ -563,30 +713,6 @@ app.patch('/api/user/bookings/:id/cancel', async (req, res) => {
     } catch (error) {
         console.error('Error cancelling booking:', error);
         return res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
-const Razorpay = require('razorpay');
-
-const razorpay = new Razorpay({
-    key_id: 'rzp_test_TqWKiwLDZP5zK2',      
-    key_secret: 'U6WBiiowM3NSLrbf9EHWkikR' 
-});
-
-// Create Order API
-app.post('/api/create-order', async (req, res) => {
-    try {
-        const { amount } = req.body;
-        const options = {
-            amount: Math.round(amount * 100), 
-            currency: "INR",
-            receipt: "receipt_order_" + Date.now()
-        };
-        const order = await razorpay.orders.create(options);
-        res.json({ success: true, order });
-    } catch (error) {
-        console.error("Razorpay order error:", error);
-        res.status(500).json({ success: false, message: "Failed to create order" });
     }
 });
 
