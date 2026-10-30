@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Nessus Tours & Travels</title>
+    <title>About Us - Technitude Tours & Travels</title>
 
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -40,8 +39,7 @@
             text-decoration: none;
         }
 
-        /* ================= HEADER ================= */
-
+        /* Standardized Header & Navbar */
         header {
             position: fixed;
             top: 0;
@@ -114,7 +112,8 @@
             transition: 0.3s;
         }
 
-        .nav-links a:hover {
+        .nav-links a:hover,
+        .nav-links a.active {
             color: var(--primary);
         }
 
@@ -128,10 +127,12 @@
         .login-button:hover {
             background: var(--primary-dark);
         }
+
         .user-avatar-container {
             position: relative;
             display: inline-block;
         }
+
         .user-avatar {
             width: 42px;
             height: 42px;
@@ -147,9 +148,11 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.15);
             transition: 0.2s;
         }
+
         .user-avatar:hover {
             background: var(--primary-dark);
         }
+
         .user-dropdown {
             display: none;
             position: absolute;
@@ -185,6 +188,7 @@
             background: var(--light);
             color: var(--primary);
         }
+
         /* Hero */
         .hero {
             background: linear-gradient(
@@ -192,11 +196,10 @@
                 rgba(0, 0, 0, 0.55)
             ),
             url("https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1600&q=80");
-
             background-size: cover;
             background-position: center;
             height: 320px;
-
+            margin-top: 82px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -240,8 +243,7 @@
             font-size: 16px;
         }
 
-        /* ================= SERVICES ================= */
-
+        /* Services */
         .services {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -267,9 +269,7 @@
             color: var(--text);
         }
 
-
-        /* ================= FOOTER ================= */
-
+        /* Footer */
         footer {
             background: var(--secondary);
             color: var(--white);
@@ -283,37 +283,16 @@
             color: #ccc;
         }
 
-        /* Mobile */
         @media (max-width: 700px) {
-            header {
-                padding: 18px 25px;
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            nav a {
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-
-            .hero h1 {
-                font-size: 34px;
-            }
-
-            .services {
-                grid-template-columns: 1fr;
-            }
-
-            .section {
-                padding: 25px;
-            }
+            .hero h1 { font-size: 34px; }
+            .services { grid-template-columns: 1fr; }
+            .section { padding: 25px; }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
     <header>
         <nav class="navbar">
             <a href="home.html" class="logo">
@@ -324,42 +303,18 @@
                 </span>
             </a>
 
-                        <ul class="nav-links">
-                <li>
-                    <a href="home.html">
-                        Home
-                    </a>
-                </li>
-
-                <li>
-                    <a href="bookings.html">
-                        Manage Bookings
-                    </a>
-                </li>
-
-                <li>
-                    <a href="contact.html">
-                        Contact
-                    </a>
-                </li>
-
-                <li>
-                    <a href="AboutUs.html">
-                        About Us
-                    </a>
-                </li>
-
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="bookings.html">Manage Bookings</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="AboutUs.html" class="active">About Us</a></li>
                 <li id="navLoginItem">
-                    <a href="login.html" class="login-button">
-                        Login
-                    </a>
+                    <a href="login.html" class="login-button">Login</a>
                 </li>
             </ul>
         </nav>
     </header>
 
-
-    <!-- Hero Section -->
     <section class="hero">
         <div>
             <h1>Travel With Comfort</h1>
@@ -367,14 +322,9 @@
         </div>
     </section>
 
-
-    <!-- Main Content -->
     <main class="container">
-
-        <!-- Who We Are -->
         <section class="section">
             <h2>Who We Are</h2>
-
             <p>
                 Technitude Travels is a transportation service focused on
                 providing convenient and reliable intercity travel across
@@ -383,11 +333,8 @@
             </p>
         </section>
 
-
-        <!-- What We Do -->
         <section class="section">
             <h2>What We Do</h2>
-
             <p>
                 We provide transportation services connecting different cities
                 across Maharashtra. Our platform is designed to make it easier
@@ -396,73 +343,48 @@
             </p>
         </section>
 
-
-        <!-- Services -->
         <section class="section">
             <h2>What We Offer</h2>
-
             <div class="services">
-
                 <div class="service">
                     <h3>Easy Travel</h3>
-                    <p>
-                        Simple and convenient intercity transportation
-                        for passengers.
-                    </p>
+                    <p>Simple and convenient intercity transportation for passengers.</p>
                 </div>
-
                 <div class="service">
                     <h3>Reliable Routes</h3>
-                    <p>
-                        Connecting passengers between cities across
-                        Maharashtra.
-                    </p>
+                    <p>Connecting passengers between cities across Maharashtra.</p>
                 </div>
-
                 <div class="service">
                     <h3>Convenient Booking</h3>
-                    <p>
-                        A simple platform to search for routes and plan
-                        your journey.
-                    </p>
+                    <p>A simple platform to search for routes and plan your journey.</p>
                 </div>
-
             </div>
         </section>
 
-
-        <!-- Vision -->
         <section class="section">
             <h2>Our Vision</h2>
-
             <p>
                 Our vision is to expand Technitude Travels beyond Maharashtra
                 and provide reliable transportation services across India.
                 We aim to connect more cities, serve more passengers, and make
-                intercity travel easier and more convenient throughout the
-                country.
+                intercity travel easier and more convenient throughout the country.
             </p>
         </section>
 
-
-        <!-- Mission -->
         <section class="section">
             <h2>Our Mission</h2>
-
             <p>
                 Our mission is to provide a simple, reliable, and convenient
                 transportation experience while continuously expanding our
                 network to connect people and cities across India.
             </p>
         </section>
-
     </main>
 
-
-    <!-- Footer -->
     <footer>
         <p>© 2026 Technitude Travels. All Rights Reserved.</p>
     </footer>
+
     <script>
         function checkAuthState() {
             const userJson = localStorage.getItem('loggedInUser');
@@ -473,8 +395,6 @@
                 try {
                     const user = JSON.parse(userJson);
                     const name = user.full_name || user.email || 'U';
-                    
-                    // Get initials (up to 2 characters)
                     const parts = name.trim().split(' ');
                     let initials = '';
                     if (parts.length >= 2) {
@@ -483,7 +403,6 @@
                         initials = name.substring(0, 2).toUpperCase();
                     }
 
-                    // If support/admin, you can also optionally show a Dashboard link alongside the avatar or keep it clean
                     navLoginItem.innerHTML = `
                         <div class="user-avatar-container">
                             <div class="user-avatar" onclick="toggleUserDropdown(event)" title="${name}">
@@ -516,7 +435,6 @@
             }
         }
 
-        // Close dropdown when clicking outside
         window.addEventListener('click', function() {
             const dropdown = document.getElementById('userDropdown');
             if (dropdown && dropdown.classList.contains('show')) {
@@ -524,7 +442,6 @@
             }
         });
 
-        // Run check on page load
         document.addEventListener("DOMContentLoaded", checkAuthState);
     </script>
 </body>
