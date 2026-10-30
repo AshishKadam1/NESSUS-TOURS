@@ -125,7 +125,7 @@ h1 {
 
 .dot.available { background: white; }
 .dot.chosen { background: var(--teal); }
-.dot.booked { background: #dce3e6; }
+.dot.booked { background: #cbd5e1; }
 
 .driver {
     max-width: 350px;
@@ -172,6 +172,16 @@ h1 {
     background: var(--teal);
     border-color: var(--teal);
     color: white;
+}
+
+/* Explicit styling and click prevention for Booked/Unavailable seats */
+.seat.booked {
+    background-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    opacity: 0.6;
 }
 
 .seat:focus-visible {
@@ -275,17 +285,6 @@ footer {
 </head>
 
 <body>
-
-<header>
-    <h2>TECHNITUDE TOURS</h2>
-    <a href="bus-results.html" onclick="
-        if (history.length > 1) {
-            history.back();
-            return false;
-        }
-    ">← Back to Buses</a>
-</header>
-
 <main class="container">
 
     <h1>Select Your Seats</h1>
@@ -325,8 +324,7 @@ footer {
             </div>
 
             <p class="note">
-                All seats start as available in this demo.
-                Real booked-seat status requires database integration.
+                Booked seats are synced live from MySQL database. Unavailable seats cannot be selected.
             </p>
         </section>
 
@@ -404,24 +402,21 @@ const busId = params.get("bus_id") || params.get("id") || "";
 const busName = params.get("bus_name") || params.get("name") || "Nessus Express";
 const from = params.get("from") || params.get("from_city") || "";
 const to = params.get("to") || params.get("to_city") || "";
-const rawDate = params.get("date") || params.get("journey_date") || "";
-const journeyDate = rawDate.slice(0, 10);
 
-console.log("Received URL date:", rawDate);
-console.log("Final journey date:", journeyDate);
+// Safely extract strictly the YYYY-MM-DD portion from the date parameter
+const rawDateParam = params.get("date") || params.get("journey_date") || "";
+const journeyDate = rawDateParam ? rawDateParam.substring(0, 10) : "";
+
 const busType = params.get("bus_type") || params.get("type") || "Bus";
 
 const rawPrice = Number(params.get("price"));
-const price = Number.isFinite(rawPrice) && rawPrice > 0
-    ? rawPrice
-    : 0;
+const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 0;
 
 const rawSeatCount = Number(params.get("total_seats"));
-const totalSeats = Number.isInteger(rawSeatCount) && rawSeatCount > 0
-    ? Math.min(rawSeatCount, 40)
-    : 30;
+const totalSeats = Number.isInteger(rawSeatCount) && rawSeatCount > 0 ? Math.min(rawSeatCount, 40) : 30;
 
 const selected = new Set();
+let bookedSeatsSet = new Set();
 let appliedOffer = null;
 
 const offers = {
@@ -436,87 +431,107 @@ function money(value) {
 }
 
 document.getElementById("busName").textContent = busName;
-document.getElementById("route").textContent =
-    from && to ? `${from} → ${to}` : "Route not provided";
-
-document.getElementById("journeyDate").textContent =
-    journeyDate || "Journey date not provided";
-
+document.getElementById("route").textContent = from && to ? `${from} → ${to}` : "Route not provided";
+document.getElementById("journeyDate").textContent = journeyDate || "Journey date not provided";
 document.getElementById("busType").textContent = busType;
 document.getElementById("priceDisplay").textContent = money(price);
-
-document.getElementById("summaryRoute").textContent =
-    from && to ? `${from} → ${to}` : "—";
-
+document.getElementById("summaryRoute").textContent = from && to ? `${from} → ${to}` : "—";
 document.getElementById("summaryDate").textContent = journeyDate || "—";
 
 const seatMap = document.getElementById("seatMap");
 
 function createSeat(number) {
     const button = document.createElement("button");
+    const seatStr = String(number).trim();
 
     button.type = "button";
-    button.className = "seat available";
     button.textContent = number;
     button.setAttribute("aria-label", `Seat ${number}`);
-    button.setAttribute("aria-pressed", "false");
+
     button.style.gridColumn = [1, 2, 4, 5][(number - 1) % 4];
     button.style.gridRow = Math.floor((number - 1) / 4) + 1;
 
-    button.addEventListener("click", () => {
-        if (selected.has(number)) {
-            selected.delete(number);
-        } else {
-            selected.add(number);
+    // Robust check against string/whitespace variation in booked seats
+    let isBooked = false;
+    bookedSeatsSet.forEach(bookedSeat => {
+        if (String(bookedSeat).trim() === seatStr) {
+            isBooked = true;
         }
-
-        const isSelected = selected.has(number);
-
-        button.classList.toggle("selected", isSelected);
-        button.classList.toggle("available", !isSelected);
-        button.setAttribute("aria-pressed", String(isSelected));
-
-        updateSummary();
     });
+
+    if (isBooked) {
+        button.className = "seat booked";
+        button.disabled = true;
+        button.setAttribute("aria-disabled", "true");
+        // Extra safeguard: prevent click handlers entirely
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
+    } else {
+        button.className = "seat available";
+        button.setAttribute("aria-pressed", "false");
+
+        button.addEventListener("click", () => {
+            if (selected.has(number)) {
+                selected.delete(number);
+            } else {
+                selected.add(number);
+            }
+
+            const isSelected = selected.has(number);
+            button.classList.toggle("selected", isSelected);
+            button.classList.toggle("available", !isSelected);
+            button.setAttribute("aria-pressed", String(isSelected));
+
+            updateSummary();
+        });
+    }
 
     return button;
 }
 
-/* Two seats + aisle + two seats */
-for (let number = 1; number <= totalSeats; number++) {
-    seatMap.appendChild(createSeat(number));
+// Fetch booked seats from database before rendering seat grid
+async function initSeatMap() {
+    try {
+        if (busId && journeyDate) {
+            const res = await fetch(`http://localhost:3000/api/buses/${busId}/booked-seats?date=${journeyDate}`);
+            const data = await res.json();
+            if (data.success && Array.isArray(data.bookedSeats)) {
+                bookedSeatsSet = new Set(data.bookedSeats);
+            }
+        }
+    } catch (err) {
+        console.error("Could not fetch booked seats:", err);
+    }
+
+    // Render seat buttons
+    seatMap.innerHTML = "";
+    for (let number = 1; number <= totalSeats; number++) {
+        seatMap.appendChild(createSeat(number));
+    }
+    updateSummary();
 }
 
 function updateSummary() {
     const seats = [...selected].sort((a, b) => a - b);
     const baseFare = seats.length * price;
 
-    const discount = appliedOffer
-        ? Math.min(appliedOffer.amount, baseFare)
-        : 0;
-
+    const discount = appliedOffer ? Math.min(appliedOffer.amount, baseFare) : 0;
     const finalAmount = baseFare - discount;
 
-    document.getElementById("selectedSeats").textContent =
-        seats.length ? seats.join(", ") : "None";
-
+    document.getElementById("selectedSeats").textContent = seats.length ? seats.join(", ") : "None";
     document.getElementById("seatCount").textContent = seats.length;
     document.getElementById("baseFare").textContent = money(baseFare);
     document.getElementById("discountAmount").textContent = "− " + money(discount);
-
-    document.getElementById("appliedCoupon").textContent =
-        appliedOffer ? appliedOffer.code : "None";
-
+    document.getElementById("appliedCoupon").textContent = appliedOffer ? appliedOffer.code : "None";
     document.getElementById("totalFare").textContent = money(finalAmount);
 
-    document.getElementById("continueBtn").disabled =
-        seats.length === 0 || price <= 0;
+    document.getElementById("continueBtn").disabled = seats.length === 0 || price <= 0;
 }
 
 document.getElementById("applyCoupon").addEventListener("click", () => {
-    const code = document.getElementById("couponCode")
-        .value.trim().toUpperCase();
-
+    const code = document.getElementById("couponCode").value.trim().toUpperCase();
     const message = document.getElementById("couponMessage");
     const offer = offers[code];
 
@@ -538,7 +553,6 @@ document.getElementById("applyCoupon").addEventListener("click", () => {
         }
 
         const day = new Date(journeyDate + "T12:00:00").getDay();
-
         if (day !== 0 && day !== 6) {
             appliedOffer = null;
             message.style.color = "red";
@@ -549,10 +563,8 @@ document.getElementById("applyCoupon").addEventListener("click", () => {
     }
 
     appliedOffer = { ...offer, code };
-
     message.style.color = "green";
     message.textContent = `${code} applied. Discount updated below.`;
-
     updateSummary();
 });
 
@@ -571,11 +583,7 @@ document.getElementById("continueBtn").addEventListener("click", () => {
 
     const seats = [...selected].sort((a, b) => a - b);
     const baseFare = seats.length * price;
-
-    const discount = appliedOffer
-        ? Math.min(appliedOffer.amount, baseFare)
-        : 0;
-
+    const discount = appliedOffer ? Math.min(appliedOffer.amount, baseFare) : 0;
     const finalAmount = baseFare - discount;
 
     const query = new URLSearchParams({
@@ -597,7 +605,8 @@ document.getElementById("continueBtn").addEventListener("click", () => {
     window.location.href = `booking.html?${query.toString()}`;
 });
 
-updateSummary();
+// Initialize seat map on load
+initSeatMap();
 </script>
 
 </body>
