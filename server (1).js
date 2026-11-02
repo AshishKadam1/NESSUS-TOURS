@@ -1,670 +1,722 @@
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
+const path = require('path');
+const Razorpay = require('razorpay');
+const pool = require('./db');
+ 
+const app = express(); 
+const PORT = 3000; 
+ 
+app.use(cors()); 
+app.use(express.json()); 
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// ========================================
-// TECHNITUDE TOURS & TRAVELS
-// Express + MySQL + Wallet Payment
-// ========================================
-
-const express = require("express");
-const mysql = require("mysql2");
-const mysqlPromise = require("mysql2/promise");
-const cors = require("cors");
-const path = require("path");
-const bcrypt = require("bcryptjs");
-
-const app = express();
-const PORT = 3000;
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static(__dirname));
-
-// ========================================
-// MYSQL CONNECTIONS
-// ========================================
-
-const dbConfig = {
-    host: "localhost",
-    user: "root",
-    password: process.env.DB_PASSWORD || "kali",
-    database: "Technitude"
-};
-
-// Existing APIs: bus search, register and login
-const db = mysql.createConnection(dbConfig);
-
-// Wallet APIs: async queries and transactions
-const walletDb = mysqlPromise.createPool({
-    ...dbConfig,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'home.html'));
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error("MySQL connection failed:", err.message);
-        return;
-    }
+// Test API 
+app.get('/api/test', (req, res) => { 
+    res.json({ 
+        success: true, 
+        message: 'Technitude Travels backend is working!' 
+    }); 
+}); 
 
-    console.log("MySQL connected successfully!");
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_TqWKiwLDZP5zK2',      
+    key_secret: 'U6WBiiowM3NSLrbf9EHWkikR' 
 });
 
-// ========================================
-// HOME PAGE
-// ========================================
+// ==========================================
+// CORE USER & BOOKING API ROUTES (Placed at top to avoid 404/static conflicts)
+// ==========================================
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "home.html"));
-});
+// Save Booking API (Matches payload from payment.html)
+app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
+    try {
+        console.log("Received booking payload:", req.body);
 
-// ========================================
-// SEARCH BUSES
-// ========================================
+        const bus_id = req.body.bus_id || req.body.busId;
+        const journey_date = req.body.journey_date || req.body.date;
+        const seats_array = req.body.seats;
+        const seats_booked = Array.isArray(seats_array) ? seats_array.join(', ') : (req.body.seats_booked || seats_array);
+        const total_amount = req.body.total_amount || req.body.total || req.body.price;
+        
+        // Passenger & Payment info
+        const passenger_name = req.body.passenger_name || 'Guest';
+        const phone = req.body.phone || '';
+        const email = req.body.email || '';
+        const payment_id = req.body.payment_id || req.body.razorpay_payment_id || '';
 
-app.get("/api/buses", (req, res) => {
-    const { from, to, date } = req.query;
+        let user_id = req.body.user_id || req.body.userId || req.headers['x-user-id'];
+        
+        if (!user_id && email) {
+            const [userRows] = await pool.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [email]);
+            if (userRows.length > 0) {
+                user_id = userRows[0].user_id;
+            }
+        }
+        if (!user_id) {
+            user_id = 1; // Fallback default user ID if none found
+        }
 
-    if (!from || !to || !date) {
-        return res.status(400).json({
-            message: "From, To and Journey Date are required"
-        });
-    }
-
-    const sql = `
-        SELECT
-            id,
-            bus_name,
-            bus_number,
-            bus_type,
-            from_city,
-            to_city,
-            DATE_FORMAT(journey_date, '%Y-%m-%d') AS journey_date,
-            departure_time,
-            arrival_time,
-            price,
-            total_seats
-        FROM buses
-        WHERE LOWER(TRIM(from_city)) = LOWER(TRIM(?))
-          AND LOWER(TRIM(to_city)) = LOWER(TRIM(?))
-          AND journey_date = ?
-        ORDER BY departure_time ASC
-    `;
-
-    db.query(sql, [from, to, date], (err, results) => {
-        if (err) {
-            console.error("Bus search error:", err.message);
-
-            return res.status(500).json({
-                message: "Database error while searching buses"
+        if (!bus_id || !seats_booked || !total_amount) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Missing required fields', 
+                received: req.body 
             });
         }
 
-        res.json(results);
-    });
+        const booking_reference = 'TT-' + Math.floor(100000 + Math.random() * 900000);
+
+        const query = `
+            INSERT INTO bookings (
+                user_id, 
+                bus_id, 
+                booking_reference, 
+                journey_date, 
+                seats_booked, 
+                total_amount, 
+                booking_status, 
+                booking_time
+            )
+            VALUES (?, ?, ?, ?, ?, ?, 'CONFIRMED', NOW())
+        `;
+
+        const [result] = await pool.query(query, [
+            user_id, 
+            bus_id, 
+            booking_reference, 
+            journey_date || null, 
+            String(seats_booked), 
+            total_amount
+        ]);
+
+        return res.status(201).json({ 
+            success: true, 
+            message: 'Booking saved successfully', 
+            bookingId: result.insertId,
+            booking_id: result.insertId,
+            booking_reference 
+        });
+    } catch (error) {
+        console.error('Error saving booking:', error);
+        return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+    }
 });
 
-// ========================================
-// WALLET BALANCE
-// ========================================
-
-app.get("/api/wallet-balance", async (req, res) => {
+// Get Booked Seats for a Specific Bus & Date
+app.get('/api/buses/:id/booked-seats', async (req, res) => {
     try {
-        // DEMO ONLY: customer ID 1
-        const customerId = 1;
+        const busId = req.params.id;
+        const { date } = req.query;
 
-        const [rows] = await walletDb.execute(
-            `SELECT balance
-             FROM customer_wallets
-             WHERE customer_id = ?`,
-            [customerId]
+        console.log(`Fetching booked seats for Bus ID: ${busId} on Date: ${date}`);
+
+        if (!date) {
+            return res.status(400).json({ success: false, message: 'Journey date is required' });
+        }
+
+        const [bookings] = await pool.query(
+            `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+            [busId, date]
         );
 
-        if (rows.length === 0) {
-            return res.status(404).json({
-                message: "Wallet not found. Create a demo wallet first."
-            });
-        }
-
-        res.json({
-            balance: Number(rows[0].balance)
+        // Extract and flatten all booked seats into a single array
+        const bookedSeats = [];
+        bookings.forEach(row => {
+            if (row.seats_booked) {
+                row.seats_booked.split(',').forEach(seat => {
+                    bookedSeats.push(seat.trim());
+                });
+            }
         });
 
+        return res.json({ success: true, bookedSeats });
     } catch (error) {
-        console.error("Wallet balance error:", error.message);
-
-        res.status(500).json({
-            message: "Unable to load wallet balance"
-        });
+        console.error('Error fetching booked seats:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-// ========================================
-// WALLET PAYMENT + BOOKING
-// ========================================
-
-app.post("/api/wallet-pay", async (req, res) => {
-    let connection;
-    let transactionStarted = false;
-
+// Create Order API with Double-Booking Concurrency Check
+app.post('/api/create-order', async (req, res) => {
     try {
-        const {
-            bus_id,
-            date,
-            seats,
-            passenger_name,
-            age,
-            gender,
-            phone,
-            email
-        } = req.body;
+        const { amount, bus_id, date, seats } = req.body;
 
-        const busId = Number(bus_id);
-        const passengerAge = Number(age);
-        const seatNumbers = Array.isArray(seats)
-            ? seats.map(Number)
-            : [];
+        // 1. Concurrency Check: Verify if requested seats are already taken
+        if (bus_id && date && seats && Array.isArray(seats) && seats.length > 0) {
+            const [existingBookings] = await pool.query(
+                `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+                [bus_id, date]
+            );
 
-        const name = String(passenger_name || "").trim();
-        const mobile = String(phone || "").trim();
-        const mail = String(email || "").trim();
-
-        const validGenders = [
-            "Male",
-            "Female",
-            "Other",
-            "Prefer not to say"
-        ];
-
-        // Validate bus ID
-        if (!Number.isInteger(busId) || busId < 1) {
-            return res.status(400).json({
-                message: "Invalid bus ID"
+            const bookedSeatsSet = new Set();
+            existingBookings.forEach(row => {
+                if (row.seats_booked) {
+                    row.seats_booked.split(',').forEach(s => bookedSeatsSet.add(s.trim()));
+                }
             });
+
+            const conflict = seats.some(seat => bookedSeatsSet.has(String(seat)));
+            if (conflict) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'One or more of your selected seats have just been booked by another user. Please go back and select different seats.' 
+                });
+            }
         }
 
-        // Validate date format
-        
-        // Validate and normalize journey date
-        
-const journeyDate = String(date || "").slice(0, 10);
-console.log("Raw date received:", date);
-console.log("Normalized journey date:", journeyDate);
+        // 2. Proceed with Razorpay Order Creation if seats are available
+        const options = {
+            amount: Math.round(amount * 100), 
+            currency: "INR",
+            receipt: "receipt_order_" + Date.now()
+        };
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error("Razorpay order error:", error);
+        res.status(500).json({ success: false, message: "Failed to create order" });
+    }
+});
 
+// Registration API 
+app.post('/api/register', async (req, res) => { 
+    try { 
+        const { full_name, email, phone, password, role } = req.body; 
+ 
+        if (!full_name || !email || !phone || !password) { 
+            return res.status(400).json({ 
+                success: false, 
+                message: 'All fields are required' 
+            }); 
+        } 
+ 
+        const allowedRoles = ['CUSTOMER', 'AGENT', 'OPERATOR', 'SUPPORT']; 
+ 
+        if (!allowedRoles.includes(role)) { 
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid account type' 
+            }); 
+        } 
+ 
+        const [existingUser] = await pool.query( 
+            'SELECT user_id FROM users WHERE email = ?', 
+            [email] 
+        ); 
+ 
+        if (existingUser.length > 0) { 
+            return res.status(409).json({ 
+                success: false, 
+                message: 'Email is already registered' 
+            }); 
+        } 
+ 
+        const passwordHash = await bcrypt.hash(password, 10); 
+ 
+        const [result] = await pool.query( 
+            `INSERT INTO users 
+             (full_name, email, phone, password_hash, role) 
+             VALUES (?, ?, ?, ?, ?)`, 
+            [full_name, email, phone, passwordHash, role] 
+        ); 
+ 
+        return res.status(201).json({ 
+            success: true, 
+            message: 'Registration successful', 
+            userId: result.insertId 
+        }); 
+    } catch (error) { 
+        console.error('Registration error:', error); 
+ 
+        if (error.code === 'ER_DUP_ENTRY') { 
+            return res.status(409).json({ 
+                success: false, 
+                message: 'Email or phone number is already registered' 
+            }); 
+        } 
+ 
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        }); 
+    } 
+}); 
+ 
+// Login API 
+app.post('/api/login', async (req, res) => { 
+    try { 
+        const { emailOrMobile, password } = req.body; 
+ 
+        if (!emailOrMobile || !password) { 
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email/mobile and password are required' 
+            }); 
+        } 
+ 
+        const [users] = await pool.query( 
+            `SELECT user_id, full_name, email, phone, password_hash, role, is_active 
+             FROM users 
+             WHERE email = ? OR phone = ? 
+             LIMIT 1`, 
+            [emailOrMobile, emailOrMobile] 
+        ); 
+ 
+        if (users.length === 0) { 
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Invalid email/mobile or password' 
+            }); 
+        } 
+ 
+        const user = users[0]; 
+ 
+        if (!user.is_active) { 
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Your account is inactive' 
+            }); 
+        } 
+ 
+        const passwordMatch = await bcrypt.compare( 
+            password, 
+            user.password_hash 
+        ); 
+ 
+        if (!passwordMatch) { 
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Invalid email/mobile or password' 
+            }); 
+        } 
+ 
+        return res.json({ 
+            success: true, 
+            message: 'Login successful', 
+            user: { 
+                id: user.user_id, 
+                user_id: user.user_id, 
+                full_name: user.full_name, 
+                email: user.email, 
+                phone: user.phone, 
+                role: user.role 
+            } 
+        }); 
+    } catch (error) { 
+        console.error('Login error:', error); 
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Server error' 
+        }); 
+    } 
+}); 
+// Bus Search API 
+app.get('/api/buses', async (req, res) => { 
+    try { 
+        const { from, to, date } = req.query; 
+ 
+        if (!from || !to || !date) { 
+            return res.status(400).json({ 
+                message: 'From, To and Journey Date are required' 
+            }); 
+        } 
+ 
+        const sql = ` 
+            SELECT 
+                bus_id, 
+                operator_id,
+                bus_name, 
+                bus_number, 
+                bus_type, 
+                from_city, 
+                to_city, 
+                journey_date, 
+                departure_time, 
+                arrival_time, 
+                price, 
+                total_seats 
+            FROM buses 
+            WHERE LOWER(TRIM(from_city)) = LOWER(TRIM(?)) 
+              AND LOWER(TRIM(to_city)) = LOWER(TRIM(?)) 
+              AND journey_date = ? 
+            ORDER BY departure_time ASC 
+        `; 
+ 
+        const [results] = await pool.query(sql, [from, to, date]); 
+ 
+        const mappedResults = await Promise.all(results.map(async (bus) => {
+            // Using the exact same query format as your working booked-seats route
+            const [bookings] = await pool.query(
+                `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+                [bus.bus_id, date]
+            );
 
-const parsedDate = new Date(`${journeyDate}T00:00:00Z`);
+            // Extract and count booked seats using the exact same logic
+            const bookedSeats = [];
+            bookings.forEach(row => {
+                if (row.seats_booked) {
+                    row.seats_booked.split(',').forEach(seat => {
+                        const trimmed = seat.trim();
+                        if (trimmed) {
+                            bookedSeats.push(trimmed);
+                        }
+                    });
+                }
+            });
 
-if (
-  !/^\d{4}-\d{2}-\d{2}$/.test(journeyDate) ||
-  Number.isNaN(parsedDate.getTime()) ||
-  parsedDate.toISOString().slice(0, 10) !== journeyDate
-) {
-  return res.status(400).json({
-    message: "Invalid journey date"
-  });
+            // Use Set to ensure unique seat counts
+            const bookedCount = new Set(bookedSeats).size;
+            const availableSeats = Math.max(0, bus.total_seats - bookedCount);
+
+            return {
+                ...bus,
+                id: bus.bus_id,
+                seats_available: availableSeats,
+                available_seats: availableSeats
+            };
+        }));
+
+        return res.json(mappedResults); 
+    } catch (error) { 
+        console.error('Bus search error:', error);
+        return res.status(500).json({ 
+            message: 'Database error' 
+        }); 
+    } 
+});
+// SUPPORT STAFF & CONTACT ENDPOINTS
+
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { full_name, email, phone, subject, message } = req.body;
+
+        if (!full_name || !email || !message) {
+            return res.status(400).json({ success: false, message: 'Name, email, and message are required' });
+        }
+
+        const query = `
+            INSERT INTO support_messages (parent_id, full_name, email, phone, subject, message, sender_type, status) 
+            VALUES (NULL, ?, ?, ?, ?, ?, 'CUSTOMER', 'PENDING')
+        `;
+        await pool.query(query, [full_name, email, phone || null, subject || 'General Inquiry', message]);
+
+        return res.status(201).json({ success: true, message: 'Message sent successfully' });
+    } catch (error) {
+        console.error('Contact submission error:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.get('/api/support/messages', async (req, res) => {
+    try {
+        const [messages] = await pool.query(
+            `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
+             FROM support_messages 
+             WHERE parent_id IS NULL 
+             ORDER BY created_at DESC`
+        );
+        return res.json(messages);
+    } catch (error) {
+        console.error('Error fetching support messages:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.get('/api/support/messages/:id/thread', async (req, res) => {
+    try {
+        const messageId = req.params.id;
+        const [thread] = await pool.query(
+            `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
+             FROM support_messages 
+             WHERE message_id = ? OR parent_id = ? 
+             ORDER BY created_at ASC`,
+            [messageId, messageId]
+        );
+        return res.json(thread);
+    } catch (error) {
+        console.error('Error fetching thread:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.post('/api/support/messages/:id/reply', async (req, res) => {
+    try {
+        const messageId = req.params.id;
+        const { reply_text, sender_name, sender_type } = req.body;
+
+        if (!reply_text) {
+            return res.status(400).json({ success: false, message: 'Reply text is required' });
+        }
+
+        const [parent] = await pool.query(`SELECT email, full_name FROM support_messages WHERE message_id = ?`, [messageId]);
+        if (parent.length === 0) {
+            return res.status(404).json({ success: false, message: 'Message thread not found' });
+        }
+
+        const type = sender_type || 'SUPPORT';
+        const name = sender_name || (type === 'SUPPORT' ? 'Support Team' : parent[0].full_name);
+
+        const query = `
+            INSERT INTO support_messages (parent_id, full_name, email, message, sender_type) 
+            VALUES (?, ?, ?, ?, ?)
+        `;
+        await pool.query(query, [messageId, name, parent[0].email, reply_text, type]);
+
+        return res.status(201).json({ success: true, message: 'Reply sent successfully' });
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.get('/api/user/inquiries', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        const [inquiries] = await pool.query(
+            `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
+             FROM support_messages 
+             WHERE email = ? AND parent_id IS NULL 
+             ORDER BY created_at DESC`,
+            [email]
+        );
+        return res.json(inquiries);
+    } catch (error) {
+        console.error('Error fetching user inquiries:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.patch('/api/support/messages/:id/resolve', async (req, res) => {
+    try {
+        const messageId = req.params.id;
+        await pool.query(`UPDATE support_messages SET status = 'RESOLVED' WHERE message_id = ? OR parent_id = ?`, [messageId, messageId]);
+        return res.json({ success: true, message: 'Message marked as resolved' });
+    } catch (error) {
+        console.error('Error updating message status:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ==========================================
+// OPERATOR MODULE APIS
+// ==========================================
+
+function verifyOperator(req, res, next) {
+    const userRole = req.headers['x-user-role'];
+    if (userRole === 'OPERATOR' || userRole === 'ADMIN') {
+        return next();
+    }
+    return res.status(403).json({ success: false, message: 'Access denied. Operators only.' });
 }
 
-        // Validate seats
-        if (
-            seatNumbers.length === 0 ||
-            seatNumbers.some(
-                seat => !Number.isInteger(seat) || seat < 1
-            ) ||
-            new Set(seatNumbers).size !== seatNumbers.length
-        ) {
-            return res.status(400).json({
-                message: "Invalid seat selection"
-            });
-        }
-
-        // Validate passenger
-        if (
-            !name ||
-            name.length > 100 ||
-            !Number.isInteger(passengerAge) ||
-            passengerAge < 1 ||
-            passengerAge > 120
-        ) {
-            return res.status(400).json({
-                message: "Invalid passenger details"
-            });
-        }
-
-        if (!validGenders.includes(gender)) {
-            return res.status(400).json({
-                message: "Invalid gender"
-            });
-        }
-
-        if (!/^[6-9]\d{9}$/.test(mobile)) {
-            return res.status(400).json({
-                message: "Enter a valid 10-digit mobile number"
-            });
-        }
-
-        if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail) ||
-            mail.length > 150
-        ) {
-            return res.status(400).json({
-                message: "Enter a valid email address"
-            });
-        }
-
-        // DEMO ONLY. Replace with authenticated customer ID.
-        const customerId = 1;
-
-        connection = await walletDb.getConnection();
-        await connection.beginTransaction();
-        transactionStarted = true;
-
-        // Lock wallet to prevent concurrent overspending
-        const [walletRows] = await connection.execute(
-            `SELECT balance
-             FROM customer_wallets
-             WHERE customer_id = ?
-             FOR UPDATE`,
-            [customerId]
+app.get('/api/operator/reports/summary', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const [summary] = await pool.query(
+            `SELECT 
+                COUNT(DISTINCT b.bus_id) AS total_buses,
+                COUNT(DISTINCT b.bus_id) AS total_schedules,
+                COUNT(DISTINCT bk.booking_id) AS total_bookings,
+                IFNULL(SUM(bk.total_amount), 0) AS total_revenue
+             FROM buses b
+             LEFT JOIN bookings bk ON b.bus_id = bk.bus_id
+             WHERE b.operator_id = ?`,
+            [operatorId]
         );
-
-        if (walletRows.length === 0) {
-            const error = new Error("Wallet not found");
-            error.statusCode = 404;
-            throw error;
-        }
-
-        // Get the actual fare and seat count from MySQL
-        console.log("Received Bus ID:", busId);
-console.log("Received Journey Date:", journeyDate);
-        const [busRows] = await connection.execute(
-            `SELECT id, price, total_seats
-             FROM buses
-             WHERE id = ? AND journey_date = ?
-             LIMIT 1`,
-        
-            
-[busId, journeyDate]
-
-        );
-        console.log("Matching bus:", busRows);
-
-        if (busRows.length === 0) {
-            const error = new Error(
-                "Bus not found for the selected journey date"
-            );
-            error.statusCode = 404;
-            throw error;
-        }
-
-        const price = Number(busRows[0].price);
-        const totalSeats = Number(busRows[0].total_seats);
-
-        if (
-            !Number.isFinite(price) ||
-            price <= 0 ||
-            !Number.isInteger(totalSeats) ||
-            totalSeats < 1
-        ) {
-            const error = new Error("Invalid bus fare or seat count");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (seatNumbers.some(seat => seat > totalSeats)) {
-            const error = new Error("Selected seat number is invalid");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        // DEMO: Coupon discount is not applied.
-        // Fare is calculated on the server, not trusted from the browser.
-        const baseFare = Number(
-            (price * seatNumbers.length).toFixed(2)
-        );
-
-        const discount = 0;
-        const total = baseFare;
-
-        const balanceBefore = Number(walletRows[0].balance);
-
-        if (balanceBefore < total) {
-            const error = new Error("Insufficient wallet balance");
-            error.statusCode = 400;
-            error.walletBalance = balanceBefore;
-            error.requiredAmount = total;
-            throw error;
-        }
-
-        // Create booking
-        const [bookingResult] = await connection.execute(
-            `INSERT INTO bookings
-            (
-                customer_id,
-                bus_id,
-                passenger_name,
-                age,
-                gender,
-                phone,
-                mail,
-journeyDate,
-seatNumbers.length,
-                base_fare,
-                discount,
-                total_amount,
-                payment_method,
-                payment_status,
-                booking_status
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                    'WALLET', 'PAID', 'CONFIRMED')`,
-            [
-                customerId,
-                busId,
-                name,
-                passengerAge,
-                gender,
-                mobile,
-                mail,
-                date,
-                seatNumbers.length,
-                baseFare,
-                discount,
-                total
-            ]
-        );
-
-        const bookingId = bookingResult.insertId;
-
-        // Insert selected seats.
-        // A unique key should prevent double-booking.
-        for (const seatNumber of seatNumbers) {
-            await connection.execute(
-                `INSERT INTO booking_seats
-                (booking_id, bus_id, journey_date, seat_number)
-                VALUES (?, ?, ?, ?)`,
-                [bookingId, busId, journeyDate, seatNumber]);
-        }
-
-        // Deduct wallet balance
-        const [walletUpdate] = await connection.execute(
-            `UPDATE customer_wallets
-             SET balance = balance - ?
-             WHERE customer_id = ? AND balance >= ?`,
-            [total, customerId, total]
-        );
-
-        if (walletUpdate.affectedRows !== 1) {
-            throw new Error(
-                "Wallet balance changed. Please try again."
-            );
-        }
-
-        const balanceAfter = Number(
-            (balanceBefore - total).toFixed(2)
-        );
-
-        // Save wallet transaction history
-        await connection.execute(
-            `INSERT INTO wallet_transactions
-            (
-                customer_id,
-                booking_id,
-                transaction_type,
-                amount,
-                balance_before,
-                balance_after,
-                description
-            )
-            VALUES (?, ?, 'DEBIT', ?, ?, ?, ?)`,
-            [
-                customerId,
-                bookingId,
-                total,
-                balanceBefore,
-                balanceAfter,
-                `Bus booking #${bookingId}`
-            ]
-        );
-
-        await connection.commit();
-        transactionStarted = false;
-
-        return res.status(201).json({
-            success: true,
-            message: "Wallet payment successful",
-            bookingId,
-            busId,
-            journeyDate: journeyDate,
-            seats: seatNumbers,
-            amountDeducted: total,
-            walletBalance: balanceAfter
-        });
-
+        res.json(summary[0]);
     } catch (error) {
-        if (connection && transactionStarted) {
-            try {
-                await connection.rollback();
-            } catch (rollbackError) {
-                console.error(
-                    "Rollback error:",
-                    rollbackError.message
-                );
-            }
-        }
-
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({
-                message:
-                    "A selected seat is already booked. Please choose another seat."
-            });
-        }
-
-        if (error.walletBalance !== undefined) {
-            return res.status(400).json({
-                message: error.message,
-                walletBalance: error.walletBalance,
-                requiredAmount: error.requiredAmount
-            });
-        }
-
-        console.error("Wallet payment error:", error.message);
-
-        return res.status(error.statusCode || 500).json({
-            message: error.statusCode
-                ? error.message
-                : "Wallet payment failed"
-        });
-
-    } finally {
-        if (connection) {
-            connection.release();
-        }
+        console.error('Error fetching operator summary:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-// ========================================
-// REGISTER API
-// ========================================
-
-app.post("/api/register", (req, res) => {
-    const {
-        full_name,
-        email,
-        phone,
-        password,
-        role
-    } = req.body;
-
-    if (!full_name || !email || !phone || !password || !role) {
-        return res.status(400).json({
-            success: false,
-            message: "All fields are required"
-        });
+app.get('/api/operator/buses', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const [buses] = await pool.query('SELECT *, bus_id AS id FROM buses WHERE operator_id = ?', [operatorId]);
+        res.json(buses);
+    } catch (error) {
+        console.error('Error fetching operator buses:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
-
-    if (
-        !/^[6-9]\d{9}$/.test(String(phone)) ||
-        String(password).length < 6
-    ) {
-        return res.status(400).json({
-            success: false,
-            message: "Enter a valid phone number and password"
-        });
-    }
-
-    const allowedRoles = [
-        "CUSTOMER",
-        "AGENT",
-        "OPERATOR",
-        "SUPPORT"
-    ];
-
-    if (!allowedRoles.includes(role)) {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid account type"
-        });
-    }
-
-    bcrypt.hash(password, 10)
-        .then(hashedPassword => {
-            const sql = `
-                INSERT INTO users
-                (full_name, email, phone, password, role)
-                VALUES (?, ?, ?, ?, ?)
-            `;
-
-            db.query(
-                sql,
-                [
-                    String(full_name).trim(),
-                    String(email).trim().toLowerCase(),
-                    phone,
-                    hashedPassword,
-                    role
-                ],
-                (err) => {
-                    if (err) {
-                        if (err.code === "ER_DUP_ENTRY") {
-                            return res.status(409).json({
-                                success: false,
-                                message:
-                                    "Email or mobile number already registered"
-                            });
-                        }
-
-                        console.error("Registration error:", err.message);
-
-                        return res.status(500).json({
-                            success: false,
-                            message: "Registration failed"
-                        });
-                    }
-
-                    return res.status(201).json({
-                        success: true,
-                        message: "Registration successful"
-                    });
-                }
-            );
-        })
-        .catch(error => {
-            console.error("Password hashing error:", error.message);
-
-            res.status(500).json({
-                success: false,
-                message: "Registration failed"
-            });
-        });
 });
 
-// ========================================
-// LOGIN API
-// ========================================
+app.post('/api/operator/buses', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const { bus_name, bus_number, bus_type, total_seats, from_city, to_city, journey_date, departure_time, arrival_time, price } = req.body;
 
-app.post("/api/login", (req, res) => {
-    const { emailOrMobile, password } = req.body;
-
-    if (!emailOrMobile || !password) {
-        return res.status(400).json({
-            success: false,
-            message: "Email/mobile and password are required"
-        });
-    }
-
-    const identifier = String(emailOrMobile).trim();
-
-    const sql = `
-        SELECT id, full_name, email, phone, password, role
-        FROM users
-        WHERE email = ? OR phone = ?
-        LIMIT 1
-    `;
-
-    db.query(
-        sql,
-        [identifier.toLowerCase(), identifier],
-        async (err, results) => {
-            if (err) {
-                console.error("Login error:", err.message);
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Login failed"
-                });
-            }
-
-            if (results.length === 0) {
-                return res.status(401).json({
-                    success: false,
-                    message: "Invalid email/mobile or password"
-                });
-            }
-
-            try {
-                const user = results[0];
-
-                const passwordMatches = await bcrypt.compare(
-                    password,
-                    user.password
-                );
-
-                if (!passwordMatches) {
-                    return res.status(401).json({
-                        success: false,
-                        message: "Invalid email/mobile or password"
-                    });
-                }
-
-                // This endpoint verifies credentials only.
-                // Session/authentication setup is not implemented here.
-                return res.json({
-                    success: true,
-                    message: "Login successful",
-                    user: {
-                        id: user.id,
-                        full_name: user.full_name,
-                        email: user.email,
-                        phone: user.phone,
-                        role: user.role
-                    }
-                });
-
-            } catch (error) {
-                console.error("Login error:", error.message);
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Server error"
-                });
-            }
+        if (!bus_name || !bus_number || !total_seats) {
+            return res.status(400).json({ success: false, message: 'Bus name, number, and total seats are required' });
         }
-    );
+
+        await pool.query(
+            `INSERT INTO buses (operator_id, bus_name, bus_number, bus_type, total_seats, from_city, to_city, journey_date, departure_time, arrival_time, price) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [operatorId, bus_name, bus_number, bus_type || 'AC Sleeper', total_seats, from_city || 'Kolhapur', to_city || 'Pune', journey_date || '2026-10-20', departure_time || '08:00:00', arrival_time || '14:00:00', price || 500.00]
+        );
+
+        res.status(201).json({ success: true, message: 'Bus added successfully' });
+    } catch (error) {
+        console.error('Error adding bus:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 });
 
-// ========================================
-// START SERVER - KEEP AT THE END
-// ========================================
+app.get('/api/operator/schedules', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const [schedules] = await pool.query(
+            `SELECT bus_id AS id, bus_id, bus_name, bus_number, from_city, to_city, journey_date, departure_time, arrival_time, price 
+             FROM buses 
+             WHERE operator_id = ? 
+             ORDER BY journey_date DESC`,
+            [operatorId]
+        );
+        res.json(schedules);
+    } catch (error) {
+        console.error('Error fetching operator schedules:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+app.put('/api/operator/buses/:id', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+        const { bus_name, bus_number, bus_type, total_seats, from_city, to_city, journey_date, departure_time, arrival_time, price } = req.body;
+
+        const [existing] = await pool.query('SELECT bus_id FROM buses WHERE bus_id = ? AND operator_id = ?', [busId, operatorId]);
+        if (existing.length === 0) {
+            return res.status(403).json({ success: false, message: 'Unauthorized or bus not found' });
+        }
+
+        await pool.query(
+            `UPDATE buses 
+             SET bus_name = ?, bus_number = ?, bus_type = ?, total_seats = ?, 
+                 from_city = ?, to_city = ?, journey_date = ?, departure_time = ?, arrival_time = ?, price = ? 
+             WHERE bus_id = ? AND operator_id = ?`,
+            [bus_name, bus_number, bus_type, total_seats, from_city, to_city, journey_date, departure_time, arrival_time, price, busId, operatorId]
+        );
+
+        res.json({ success: true, message: 'Bus and route updated successfully' });
+    } catch (error) {
+        console.error('Error updating bus:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.put('/api/operator/buses/:id/fleet', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+        const { bus_name, bus_number, bus_type, total_seats, price } = req.body;
+
+        await pool.query(
+            `UPDATE buses 
+             SET bus_name = ?, bus_number = ?, bus_type = ?, total_seats = ?, price = ? 
+             WHERE bus_id = ? AND operator_id = ?`,
+            [bus_name, bus_number, bus_type, total_seats, price, busId, operatorId]
+        );
+        res.json({ success: true, message: 'Bus fleet details and price updated successfully' });
+    } catch (error) {
+        console.error('Error updating bus fleet:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.put('/api/operator/buses/:id/route', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+        const { from_city, to_city, journey_date, departure_time, arrival_time, price } = req.body;
+
+        await pool.query(
+            `UPDATE buses 
+             SET from_city = ?, to_city = ?, journey_date = ?, departure_time = ?, arrival_time = ?, price = ? 
+             WHERE bus_id = ? AND operator_id = ?`,
+            [from_city, to_city, journey_date, departure_time, arrival_time, price, busId, operatorId]
+        );
+        res.json({ success: true, message: 'Route schedule updated successfully' });
+    } catch (error) {
+        console.error('Error updating route schedule:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.get('/api/user/bookings', async (req, res) => {
+    try {
+        const userId = req.headers['x-user-id'];
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required' });
+        }
+
+        const query = `
+            SELECT 
+                bk.booking_id AS id,
+                bk.booking_id,
+                bk.booking_reference,
+                bk.journey_date,
+                bk.seats_booked,
+                bk.total_amount,
+                bk.booking_status,
+                b.bus_name,
+                b.bus_type,
+                b.from_city,
+                b.to_city,
+                b.departure_time,
+                b.arrival_time
+            FROM bookings bk
+            JOIN buses b ON bk.bus_id = b.bus_id
+            WHERE bk.user_id = ?
+            ORDER BY bk.booking_time DESC
+        `;
+
+        const [userBookings] = await pool.query(query, [userId]);
+        return res.json(userBookings);
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.patch('/api/user/bookings/:id/cancel', async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const userId = req.headers['x-user-id'];
+
+        const [existing] = await pool.query(
+            'SELECT booking_id FROM bookings WHERE booking_id = ? AND user_id = ?', 
+            [bookingId, userId]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+
+        await pool.query(
+            `UPDATE bookings SET booking_status = 'CANCELLED' WHERE booking_id = ?`, 
+            [bookingId]
+        );
+
+        return res.json({ success: true, message: 'Booking cancelled successfully' });
+    } catch (error) {
+        console.error('Error cancelling booking:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Start server 
+app.listen(PORT, () => { 
+    console.log(`Technitude Travels server running at http://localhost:${PORT}`); 
 });

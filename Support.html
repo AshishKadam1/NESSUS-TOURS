@@ -219,7 +219,7 @@
                 
                 const actionBtn = msg.status === 'RESOLVED' 
                     ? 'Done' 
-                    : `<button class="btn-action" onclick="markResolved(${msg.id})">Resolve</button>`;
+                    : `<button class="btn-action" onclick="markResolved(${msg.message_id})">Resolve</button>`;
 
                 const formattedDate = formatDate(msg.created_at);
 
@@ -231,7 +231,7 @@
                         <td><b>[${msg.subject}]</b><br>${msg.message}</td>
                         <td>${statusBadge}</td>
                         <td>
-                            <button class="btn-chat" onclick="openChat(${msg.id}, '${msg.full_name}')" style="background:var(--secondary); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-right:5px;">Chat</button>
+                            <button class="btn-chat" onclick="openChat(${msg.message_id}, '${msg.full_name}')" style="background:var(--secondary); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-right:5px;">Chat</button>
                             ${actionBtn}
                         </td>
                     </tr>
