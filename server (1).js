@@ -33,7 +33,7 @@ const razorpay = new Razorpay({
 // CORE USER & BOOKING API ROUTES (Placed at top to avoid 404/static conflicts)
 // ==========================================
 
-// Save Booking API (Matches payload from payment.html)
+// Save Booking API 
 app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
     try {
         console.log("Received booking payload:", req.body);
@@ -44,30 +44,42 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
         const seats_booked = Array.isArray(seats_array) ? seats_array.join(', ') : (req.body.seats_booked || seats_array);
         const total_amount = req.body.total_amount || req.body.total || req.body.price;
         
-        // Passenger & Payment info
+        // --- ROBUST GENDER EXTRACTION & FORMATTING ---
+        let genders_input = req.body.passenger_genders || req.body.genders || req.body.gender;
+        let passenger_genders = "";
+
+        if (Array.isArray(genders_input)) {
+            passenger_genders = genders_input.map(g => (String(g).trim().toUpperCase().startsWith('F') ? 'F' : 'M')).join(', ');
+        } else if (typeof genders_input === 'string') {
+            passenger_genders = genders_input.split(',').map(g => (String(g).trim().toUpperCase().startsWith('F') ? 'F' : 'M')).join(', ');
+        } else {
+            passenger_genders = 'M'; // Safe fallback
+        }
+
+        // If multiple seats were booked but only one gender string was passed, map it to all seats
+        const seatCount = seats_booked.split(',').length;
+        const genderArray = passenger_genders.split(',').map(g => g.trim());
+        while (genderArray.length < seatCount) {
+            genderArray.push(genderArray[0] || 'M');
+        }
+        passenger_genders = genderArray.join(', ');
+
         const passenger_name = req.body.passenger_name || 'Guest';
         const phone = req.body.phone || '';
         const email = req.body.email || '';
         const payment_id = req.body.payment_id || req.body.razorpay_payment_id || '';
 
         let user_id = req.body.user_id || req.body.userId || req.headers['x-user-id'];
-        
         if (!user_id && email) {
             const [userRows] = await pool.query('SELECT user_id FROM users WHERE email = ? LIMIT 1', [email]);
             if (userRows.length > 0) {
                 user_id = userRows[0].user_id;
             }
         }
-        if (!user_id) {
-            user_id = 1; // Fallback default user ID if none found
-        }
+        if (!user_id) user_id = 1;
 
         if (!bus_id || !seats_booked || !total_amount) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Missing required fields', 
-                received: req.body 
-            });
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
         const booking_reference = 'TT-' + Math.floor(100000 + Math.random() * 900000);
@@ -79,11 +91,12 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
                 booking_reference, 
                 journey_date, 
                 seats_booked, 
+                passenger_genders,
                 total_amount, 
                 booking_status, 
                 booking_time
             )
-            VALUES (?, ?, ?, ?, ?, ?, 'CONFIRMED', NOW())
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', NOW())
         `;
 
         const [result] = await pool.query(query, [
@@ -92,6 +105,7 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
             booking_reference, 
             journey_date || null, 
             String(seats_booked), 
+            String(passenger_genders),
             total_amount
         ]);
 
@@ -99,7 +113,6 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
             success: true, 
             message: 'Booking saved successfully', 
             bookingId: result.insertId,
-            booking_id: result.insertId,
             booking_reference 
         });
     } catch (error) {
@@ -108,34 +121,39 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
     }
 });
 
-// Get Booked Seats for a Specific Bus & Date
+// Get Booked Seats & Genders for a Specific Bus & Date
 app.get('/api/buses/:id/booked-seats', async (req, res) => {
     try {
         const busId = req.params.id;
         const { date } = req.query;
-
-        console.log(`Fetching booked seats for Bus ID: ${busId} on Date: ${date}`);
 
         if (!date) {
             return res.status(400).json({ success: false, message: 'Journey date is required' });
         }
 
         const [bookings] = await pool.query(
-            `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
+            `SELECT seats_booked, passenger_genders FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
             [busId, date]
         );
 
-        // Extract and flatten all booked seats into a single array
-        const bookedSeats = [];
+        // Map each seat to its respective gender: { "3": "F", "4": "F" }
+        const seatGenderMap = {};
+        
         bookings.forEach(row => {
             if (row.seats_booked) {
-                row.seats_booked.split(',').forEach(seat => {
-                    bookedSeats.push(seat.trim());
+                const seats = row.seats_booked.split(',').map(s => s.trim());
+                const genders = row.passenger_genders ? row.passenger_genders.split(',').map(g => g.trim()) : [];
+
+                seats.forEach((seat, index) => {
+                    if (seat) {
+                        // Default to 'M' if gender data wasn't recorded previously
+                        seatGenderMap[seat] = genders[index] || 'M';
+                    }
                 });
             }
         });
 
-        return res.json({ success: true, bookedSeats });
+        return res.json({ success: true, seatGenderMap });
     } catch (error) {
         console.error('Error fetching booked seats:', error);
         return res.status(500).json({ success: false, message: 'Server error' });
