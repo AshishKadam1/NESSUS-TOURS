@@ -298,6 +298,7 @@ const booking = {
   to: params.get("to") || "",
   date: journeyDate,
   seats: (params.get("seats") || "").split(",").map(s => s.trim()).filter(Boolean),
+  genders: params.get("genders") || "", // Captured from seat-selection / booking page
   passengerName: params.get("passenger_name") || "",
   age: params.get("age") || "",
   gender: params.get("gender") || "",
@@ -353,8 +354,6 @@ payButton.addEventListener("click", async function () {
     !booking.date ||
     !booking.seats.length ||
     !booking.passengerName ||
-    !booking.age ||
-    !booking.gender ||
     !booking.phone ||
     !booking.email
   ) {
@@ -400,7 +399,7 @@ payButton.addEventListener("click", async function () {
         successElement.textContent = "Payment successful! Saving booking to database...";
 
         try {
-          // 3. Save booking and seats to MySQL
+          // 3. Save booking, seats, and genders to MySQL
           const saveResponse = await fetch('http://localhost:3000/api/bookings/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -408,6 +407,7 @@ payButton.addEventListener("click", async function () {
               bus_id: booking.busId,
               date: booking.date,
               seats: booking.seats,
+              passenger_genders: booking.genders, // Forwarding genders to backend
               passenger_name: booking.passengerName,
               age: booking.age,
               gender: booking.gender,
@@ -423,7 +423,6 @@ payButton.addEventListener("click", async function () {
           const saveResult = await saveResponse.json();
 
           if (saveResponse.ok && saveResult.success) {
-            // Display success inline on payment.html
             successElement.innerHTML = `✔ <strong>Payment Successful!</strong><br>Your booking has been saved successfully.<br><span style="font-size: 14px; color: #555;">Booking Reference ID: ${saveResult.booking_reference || saveResult.bookingId}</span>`;
             payButton.textContent = "Booking Confirmed";
             payButton.style.backgroundColor = "#2ecc71";
