@@ -13,6 +13,8 @@
     --muted: #687980;
     --line: #dce7ea;
     --bg: #f4f8fa;
+    --pink: #ec4899;
+    --blue: #3b82f6;
 }
 
 * {
@@ -125,7 +127,9 @@ h1 {
 
 .dot.available { background: white; }
 .dot.chosen { background: var(--teal); }
-.dot.booked { background: #cbd5e1; }
+.dot.booked-female { background: var(--pink); }
+.dot.booked-male { background: var(--blue); }
+.dot.reserved { border: 2px dashed var(--pink); }
 
 .driver {
     max-width: 350px;
@@ -161,6 +165,7 @@ h1 {
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
+    position: relative;
 }
 
 .seat.available:hover {
@@ -174,19 +179,24 @@ h1 {
     color: white;
 }
 
-/* Explicit styling and click prevention for Booked/Unavailable seats */
-.seat.booked {
-    background-color: #cbd5e1 !important;
-    color: #94a3b8 !important;
-    border-color: #cbd5e1 !important;
+.seat.booked-female {
+    background-color: var(--pink) !important;
+    color: white !important;
+    border-color: var(--pink) !important;
     cursor: not-allowed !important;
     pointer-events: none !important;
-    opacity: 0.6;
 }
 
-.seat:focus-visible {
-    outline: 2px solid var(--teal-dark);
-    outline-offset: 2px;
+.seat.booked-male {
+    background-color: var(--blue) !important;
+    color: white !important;
+    border-color: var(--blue) !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.seat.female-reserved {
+    border: 2px dashed var(--pink);
 }
 
 .summary-row {
@@ -276,7 +286,6 @@ footer {
     .layout {
         grid-template-columns: 1fr;
     }
-
     .card, .bus-info {
         padding: 18px;
     }
@@ -288,9 +297,7 @@ footer {
 <main class="container">
 
     <h1>Select Your Seats</h1>
-    <p class="subtitle">
-        Choose seats and apply an available offer before booking.
-    </p>
+    <p class="subtitle">Choose your seats and apply an available offer before booking.</p>
 
     <section class="bus-info">
         <div>
@@ -315,7 +322,9 @@ footer {
             <div class="legend">
                 <span><i class="dot available"></i> Available</span>
                 <span><i class="dot chosen"></i> Selected</span>
-                <span><i class="dot booked"></i> Unavailable</span>
+                <span><i class="dot reserved"></i> Female Reserved / Adjacent</span>
+                <span><i class="dot booked-female"></i> Booked (F)</span>
+                <span><i class="dot booked-male"></i> Booked (M)</span>
             </div>
 
             <div class="driver">FRONT OF BUS 🚌</div>
@@ -324,7 +333,7 @@ footer {
             </div>
 
             <p class="note">
-                Booked seats are synced live from MySQL database. Unavailable seats cannot be selected.
+                Seats 1–8 are auto-locked as Female. Seats adjacent to any female booking automatically show a pink outline indicator and lock as Female.
             </p>
         </section>
 
@@ -376,9 +385,7 @@ footer {
 
             <div class="coupon-box">
                 <input id="couponCode" placeholder="Enter coupon code">
-                <button class="apply" type="button" id="applyCoupon">
-                    Apply
-                </button>
+                <button class="apply" type="button" id="applyCoupon">Apply</button>
             </div>
 
             <p id="couponMessage" role="status"></p>
@@ -391,9 +398,7 @@ footer {
     </div>
 </main>
 
-<footer>
-    © 2026 Technitude Tours & Travels
-</footer>
+<footer>© 2026 Technitude Tours & Travels</footer>
 
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -403,7 +408,6 @@ const busName = params.get("bus_name") || params.get("name") || "Nessus Express"
 const from = params.get("from") || params.get("from_city") || "";
 const to = params.get("to") || params.get("to_city") || "";
 
-// Safely extract strictly the YYYY-MM-DD portion from the date parameter
 const rawDateParam = params.get("date") || params.get("journey_date") || "";
 const journeyDate = rawDateParam ? rawDateParam.substring(0, 10) : "";
 
@@ -415,8 +419,8 @@ const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : 0;
 const rawSeatCount = Number(params.get("total_seats"));
 const totalSeats = Number.isInteger(rawSeatCount) && rawSeatCount > 0 ? Math.min(rawSeatCount, 40) : 30;
 
-const selected = new Set();
-let bookedSeatsSet = new Set();
+const selectedSeatsMap = new Map(); 
+let seatGenderMap = {}; 
 let appliedOffer = null;
 
 const offers = {
@@ -440,6 +444,18 @@ document.getElementById("summaryDate").textContent = journeyDate || "—";
 
 const seatMap = document.getElementById("seatMap");
 
+function getPairSeat(seatNum) {
+    return (seatNum % 2 === 1) ? seatNum + 1 : seatNum - 1;
+}
+
+function isAdjacentToFemale(seatNum) {
+    const pairSeat = getPairSeat(seatNum);
+    const isBookedFemale = seatGenderMap[String(pairSeat)] === 'F';
+    const isSessionFemale = selectedSeatsMap.get(pairSeat) === 'F';
+
+    return isBookedFemale || isSessionFemale;
+}
+
 function createSeat(number) {
     const button = document.createElement("button");
     const seatStr = String(number).trim();
@@ -451,39 +467,39 @@ function createSeat(number) {
     button.style.gridColumn = [1, 2, 4, 5][(number - 1) % 4];
     button.style.gridRow = Math.floor((number - 1) / 4) + 1;
 
-    // Robust check against string/whitespace variation in booked seats
-    let isBooked = false;
-    bookedSeatsSet.forEach(bookedSeat => {
-        if (String(bookedSeat).trim() === seatStr) {
-            isBooked = true;
-        }
-    });
+    const bookedGender = seatGenderMap[seatStr];
 
-    if (isBooked) {
-        button.className = "seat booked";
+    if (bookedGender) {
+        button.className = `seat ${bookedGender === 'F' ? 'booked-female' : 'booked-male'}`;
         button.disabled = true;
         button.setAttribute("aria-disabled", "true");
-        // Extra safeguard: prevent click handlers entirely
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        }, true);
+        button.title = `Booked by ${bookedGender === 'F' ? 'Female' : 'Male'}`;
     } else {
-        button.className = "seat available";
+        const isFemaleReserved = number <= 8; 
+        const adjacentFemale = isAdjacentToFemale(number);
+        const outlineClass = (isFemaleReserved || adjacentFemale) ? 'female-reserved' : '';
+
+        button.className = `seat available ${outlineClass}`;
         button.setAttribute("aria-pressed", "false");
+        if (isFemaleReserved) button.title = "Reserved for Female Passengers";
 
         button.addEventListener("click", () => {
-            if (selected.has(number)) {
-                selected.delete(number);
+            if (selectedSeatsMap.has(number)) {
+                selectedSeatsMap.delete(number);
+                button.classList.remove("selected");
+                button.classList.add("available");
+                button.setAttribute("aria-pressed", "false");
             } else {
-                selected.add(number);
+                // ANY seat with pink outline (seats 1-8 OR adjacent to female) is automatically Female ('F')
+                let gender = (number <= 8 || isAdjacentToFemale(number)) ? 'F' : 'M';
+
+                selectedSeatsMap.set(number, gender);
+                button.classList.add("selected");
+                button.classList.remove("available");
+                button.setAttribute("aria-pressed", "true");
             }
 
-            const isSelected = selected.has(number);
-            button.classList.toggle("selected", isSelected);
-            button.classList.toggle("available", !isSelected);
-            button.setAttribute("aria-pressed", String(isSelected));
-
+            refreshSeatOutlines();
             updateSummary();
         });
     }
@@ -491,36 +507,53 @@ function createSeat(number) {
     return button;
 }
 
-// Fetch booked seats from database before rendering seat grid
+function refreshSeatOutlines() {
+    for (let number = 1; number <= totalSeats; number++) {
+        const seatStr = String(number);
+        if (!seatGenderMap[seatStr]) { 
+            const btn = seatMap.children[number - 1];
+            if (btn && !btn.classList.contains("selected")) {
+                const isFemaleReserved = number <= 8;
+                const adjacentFemale = isAdjacentToFemale(number);
+                if (isFemaleReserved || adjacentFemale) {
+                    btn.classList.add("female-reserved");
+                } else {
+                    btn.classList.remove("female-reserved");
+                }
+            }
+        }
+    }
+}
+
 async function initSeatMap() {
     try {
         if (busId && journeyDate) {
             const res = await fetch(`http://localhost:3000/api/buses/${busId}/booked-seats?date=${journeyDate}`);
             const data = await res.json();
-            if (data.success && Array.isArray(data.bookedSeats)) {
-                bookedSeatsSet = new Set(data.bookedSeats);
+            if (data.success && data.seatGenderMap) {
+                seatGenderMap = data.seatGenderMap;
             }
         }
     } catch (err) {
         console.error("Could not fetch booked seats:", err);
     }
 
-    // Render seat buttons
     seatMap.innerHTML = "";
     for (let number = 1; number <= totalSeats; number++) {
         seatMap.appendChild(createSeat(number));
     }
+    refreshSeatOutlines();
     updateSummary();
 }
 
 function updateSummary() {
-    const seats = [...selected].sort((a, b) => a - b);
+    const seats = [...selectedSeatsMap.keys()].sort((a, b) => a - b);
     const baseFare = seats.length * price;
 
     const discount = appliedOffer ? Math.min(appliedOffer.amount, baseFare) : 0;
     const finalAmount = baseFare - discount;
 
-    document.getElementById("selectedSeats").textContent = seats.length ? seats.join(", ") : "None";
+    document.getElementById("selectedSeats").textContent = seats.length ? seats.map(s => `${s} (${selectedSeatsMap.get(s)})`).join(", ") : "None";
     document.getElementById("seatCount").textContent = seats.length;
     document.getElementById("baseFare").textContent = money(baseFare);
     document.getElementById("discountAmount").textContent = "− " + money(discount);
@@ -569,19 +602,11 @@ document.getElementById("applyCoupon").addEventListener("click", () => {
 });
 
 document.getElementById("continueBtn").addEventListener("click", () => {
-    if (selected.size === 0) return;
+    if (selectedSeatsMap.size === 0) return;
 
-    if (!busId) {
-        alert("Bus ID is missing. Please select the bus again.");
-        return;
-    }
-
-    if (price <= 0) {
-        alert("Bus price is missing. Please select the bus again.");
-        return;
-    }
-
-    const seats = [...selected].sort((a, b) => a - b);
+    const seats = [...selectedSeatsMap.keys()].sort((a, b) => a - b);
+    const genders = seats.map(seat => selectedSeatsMap.get(seat));
+    
     const baseFare = seats.length * price;
     const discount = appliedOffer ? Math.min(appliedOffer.amount, baseFare) : 0;
     const finalAmount = baseFare - discount;
@@ -596,6 +621,7 @@ document.getElementById("continueBtn").addEventListener("click", () => {
         price: String(price),
         total_seats: String(totalSeats),
         seats: seats.join(","),
+        genders: genders.join(","),
         base_fare: String(baseFare),
         coupon_code: appliedOffer ? appliedOffer.code : "",
         discount: String(discount),
@@ -605,7 +631,6 @@ document.getElementById("continueBtn").addEventListener("click", () => {
     window.location.href = `booking.html?${query.toString()}`;
 });
 
-// Initialize seat map on load
 initSeatMap();
 </script>
 
