@@ -322,7 +322,7 @@ footer {
             <div class="legend">
                 <span><i class="dot available"></i> Available</span>
                 <span><i class="dot chosen"></i> Selected</span>
-                <span><i class="dot reserved"></i> Female Reserved / Adjacent</span>
+                <span><i class="dot reserved"></i> Female Adjacent</span>
                 <span><i class="dot booked-female"></i> Booked (F)</span>
                 <span><i class="dot booked-male"></i> Booked (M)</span>
             </div>
@@ -333,7 +333,7 @@ footer {
             </div>
 
             <p class="note">
-                Seats 1–8 are auto-locked as Female. Seats adjacent to any female booking automatically show a pink outline indicator and lock as Female.
+                Seats adjacent to any female booking automatically show a pink outline indicator and lock as Female.
             </p>
         </section>
 
@@ -475,13 +475,11 @@ function createSeat(number) {
         button.setAttribute("aria-disabled", "true");
         button.title = `Booked by ${bookedGender === 'F' ? 'Female' : 'Male'}`;
     } else {
-        const isFemaleReserved = number <= 8; 
         const adjacentFemale = isAdjacentToFemale(number);
-        const outlineClass = (isFemaleReserved || adjacentFemale) ? 'female-reserved' : '';
+        const outlineClass = adjacentFemale ? 'female-reserved' : '';
 
         button.className = `seat available ${outlineClass}`;
         button.setAttribute("aria-pressed", "false");
-        if (isFemaleReserved) button.title = "Reserved for Female Passengers";
 
         button.addEventListener("click", () => {
             if (selectedSeatsMap.has(number)) {
@@ -490,8 +488,8 @@ function createSeat(number) {
                 button.classList.add("available");
                 button.setAttribute("aria-pressed", "false");
             } else {
-                // ANY seat with pink outline (seats 1-8 OR adjacent to female) is automatically Female ('F')
-                let gender = (number <= 8 || isAdjacentToFemale(number)) ? 'F' : 'M';
+                // Set Female ('F') ONLY if adjacent to a female passenger, otherwise Male ('M') by default
+                let gender = isAdjacentToFemale(number) ? 'F' : 'M';
 
                 selectedSeatsMap.set(number, gender);
                 button.classList.add("selected");
@@ -513,9 +511,8 @@ function refreshSeatOutlines() {
         if (!seatGenderMap[seatStr]) { 
             const btn = seatMap.children[number - 1];
             if (btn && !btn.classList.contains("selected")) {
-                const isFemaleReserved = number <= 8;
                 const adjacentFemale = isAdjacentToFemale(number);
-                if (isFemaleReserved || adjacentFemale) {
+                if (adjacentFemale) {
                     btn.classList.add("female-reserved");
                 } else {
                     btn.classList.remove("female-reserved");
