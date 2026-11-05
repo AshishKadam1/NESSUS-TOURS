@@ -4,7 +4,10 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const Razorpay = require('razorpay');
 const pool = require('./db');
- 
+const BREVO_API_KEY = "API_KEY";
+const SENDER_EMAIL = "abc@gmail.com";
+const SENDER_NAME = "Technitude Tours & Travels";
+
 const app = express(); 
 const PORT = 3000; 
  
@@ -29,10 +32,122 @@ const razorpay = new Razorpay({
     key_secret: 'U6WBiiowM3NSLrbf9EHWkikR' 
 });
 
+// BREVO EMAIL HELPER FUNCTION
+async function sendBookingConfirmationEmail(bookingDetails) {
+    const { email, passenger_name, booking_reference, bus_name, from_city, to_city, journey_date, seats_booked, total_amount } = bookingDetails;
+    if (!email) return;
+
+    // Checks if there are multiple seats separated by commas
+    const isMultiple = String(seats_booked).includes(',');
+    const seatLabel = isMultiple ? "Seat Nos." : "Seat No.";
+
+    const emailData = {
+        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+        to: [{ email: email, name: passenger_name || 'Valued Customer' }],
+        subject: `Booking Confirmed! Reference: ${booking_reference}`,
+        htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #dce5e9; border-radius: 10px;">
+                <h2 style="color: #087e8b;">Technitude Tours & Travels</h2>
+                <p>Hello <strong>${passenger_name || 'Traveler'}</strong>,</p>
+                <p>Your bus booking has been successfully confirmed!</p>
+                
+                <div style="background: #f3f7f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>Booking Reference:</strong> ${booking_reference}</p>
+                    <p><strong>Bus Name:</strong> ${bus_name}</p>
+                    <p><strong>Route:</strong> ${from_city} → ${to_city}</p>
+                    <p><strong>Journey Date:</strong> ${journey_date}</p>
+                    <p><strong>${seatLabel}:</strong> ${seats_booked}</p>
+                    <p><strong>Total Paid:</strong> ₹${total_amount}</p>
+                </div>
+                
+                <p>Thank you for choosing Technitude Travels. Have a safe journey!</p>
+            </div>
+        `
+    };
+
+    try {
+        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+                "accept": "application/json",
+                "api-key": BREVO_API_KEY,
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log("Brevo confirmation email sent successfully:", result.messageId);
+        } else {
+            console.error("Failed to send Brevo email:", result);
+        }
+    } catch (error) {
+        console.error("Error connecting to Brevo API:", error);
+    }
+}
+
 // ==========================================
-// CORE USER & BOOKING API ROUTES (Placed at top to avoid 404/static conflicts)
+// OPERATOR MODULE APIS
 // ==========================================
 
+function verifyOperator(req, res, next) {
+    const userRole = req.headers['x-user-role'];
+    if (userRole === 'OPERATOR' || userRole === 'ADMIN') {
+        return next();
+    }
+    return res.status(403).json({ success: false, message: 'Access denied. Operators only.' });
+}
+
+// Delete Bus API
+app.delete('/api/operator/buses/:id', verifyOperator, async (req, res) => {
+    try {
+        const operatorId = req.headers['x-user-id'];
+        const busId = req.params.id;
+
+        const [existing] = await pool.query('SELECT bus_id FROM buses WHERE bus_id = ? AND operator_id = ?', [busId, operatorId]);
+        if (existing.length === 0) {
+            return res.status(403).json({ success: false, message: 'Unauthorized or bus not found' });
+        }
+
+        // Delete associated bookings first or let DB cascade if set up
+        await pool.query('DELETE FROM bookings WHERE bus_id = ?', [busId]);
+        await pool.query('DELETE FROM buses WHERE bus_id = ? AND operator_id = ?', [busId, operatorId]);
+
+        res.json({ success: true, message: 'Bus deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting bus:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Get Bookings & Passenger Details for a Specific Bus
+app.get('/api/operator/buses/:id/passengers', verifyOperator, async (req, res) => {
+    try {
+        const busId = req.params.id;
+
+        const [busCheck] = await pool.query('SELECT bus_id FROM buses WHERE bus_id = ?', [busId]);
+        if (busCheck.length === 0) {
+            return res.status(404).json({ success: false, message: 'Bus not found' });
+        }
+
+        const [bookings] = await pool.query(`
+            SELECT bk.booking_reference, bk.seats_booked, bk.passenger_genders, bk.total_amount, bk.booking_status, bk.booking_time,
+                   u.full_name AS primary_name, u.email AS primary_email, u.phone AS primary_phone
+            FROM bookings bk
+            LEFT JOIN users u ON bk.user_id = u.user_id
+            WHERE bk.bus_id = ? AND bk.booking_status = 'CONFIRMED'
+            ORDER BY bk.booking_time DESC
+        `, [busId]);
+
+        res.json({ success: true, bookings });
+    } catch (error) {
+        console.error('Error fetching passengers:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// CORE USER & BOOKING API ROUTES
 // Save Booking API 
 app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
     try {
@@ -56,7 +171,6 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
             passenger_genders = 'M'; // Safe fallback
         }
 
-        // If multiple seats were booked but only one gender string was passed, map it to all seats
         const seatCount = seats_booked.split(',').length;
         const genderArray = passenger_genders.split(',').map(g => g.trim());
         while (genderArray.length < seatCount) {
@@ -109,6 +223,35 @@ app.post(['/api/bookings/create', '/api/bookings'], async (req, res) => {
             total_amount
         ]);
 
+        // Fetch bus name and route info for the confirmation email
+        let busName = req.body.bus_name || 'Express Bus';
+        let fromCity = req.body.from || req.body.from_city || 'Origin';
+        let toCity = req.body.to || req.body.to_city || 'Destination';
+
+        try {
+            const [busRows] = await pool.query('SELECT bus_name, from_city, to_city FROM buses WHERE bus_id = ? LIMIT 1', [bus_id]);
+            if (busRows.length > 0) {
+                busName = busRows[0].bus_name;
+                fromCity = busRows[0].from_city;
+                toCity = busRows[0].to_city;
+            }
+        } catch (err) {
+            console.error('Could not fetch bus details for email:', err);
+        }
+
+        // Trigger Brevo email asynchronously
+        sendBookingConfirmationEmail({
+            email: email,
+            passenger_name: passenger_name,
+            booking_reference: booking_reference,
+            bus_name: busName,
+            from_city: fromCity,
+            to_city: toCity,
+            journey_date: journey_date || 'N/A',
+            seats_booked: String(seats_booked),
+            total_amount: total_amount
+        });
+
         return res.status(201).json({ 
             success: true, 
             message: 'Booking saved successfully', 
@@ -136,7 +279,6 @@ app.get('/api/buses/:id/booked-seats', async (req, res) => {
             [busId, date]
         );
 
-        // Map each seat to its respective gender: { "3": "F", "4": "F" }
         const seatGenderMap = {};
         
         bookings.forEach(row => {
@@ -146,7 +288,6 @@ app.get('/api/buses/:id/booked-seats', async (req, res) => {
 
                 seats.forEach((seat, index) => {
                     if (seat) {
-                        // Default to 'M' if gender data wasn't recorded previously
                         seatGenderMap[seat] = genders[index] || 'M';
                     }
                 });
@@ -165,7 +306,6 @@ app.post('/api/create-order', async (req, res) => {
     try {
         const { amount, bus_id, date, seats } = req.body;
 
-        // 1. Concurrency Check: Verify if requested seats are already taken
         if (bus_id && date && seats && Array.isArray(seats) && seats.length > 0) {
             const [existingBookings] = await pool.query(
                 `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
@@ -188,7 +328,6 @@ app.post('/api/create-order', async (req, res) => {
             }
         }
 
-        // 2. Proceed with Razorpay Order Creation if seats are available
         const options = {
             amount: Math.round(amount * 100), 
             currency: "INR",
@@ -208,61 +347,32 @@ app.post('/api/register', async (req, res) => {
         const { full_name, email, phone, password, role } = req.body; 
  
         if (!full_name || !email || !phone || !password) { 
-            return res.status(400).json({ 
-                success: false, 
-                message: 'All fields are required' 
-            }); 
+            return res.status(400).json({ success: false, message: 'All fields are required' }); 
         } 
  
         const allowedRoles = ['CUSTOMER', 'AGENT', 'OPERATOR', 'SUPPORT']; 
- 
         if (!allowedRoles.includes(role)) { 
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Invalid account type' 
-            }); 
+            return res.status(400).json({ success: false, message: 'Invalid account type' }); 
         } 
  
-        const [existingUser] = await pool.query( 
-            'SELECT user_id FROM users WHERE email = ?', 
-            [email] 
-        ); 
- 
+        const [existingUser] = await pool.query('SELECT user_id FROM users WHERE email = ?', [email]); 
         if (existingUser.length > 0) { 
-            return res.status(409).json({ 
-                success: false, 
-                message: 'Email is already registered' 
-            }); 
+            return res.status(409).json({ success: false, message: 'Email is already registered' }); 
         } 
  
         const passwordHash = await bcrypt.hash(password, 10); 
- 
         const [result] = await pool.query( 
-            `INSERT INTO users 
-             (full_name, email, phone, password_hash, role) 
-             VALUES (?, ?, ?, ?, ?)`, 
+            `INSERT INTO users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)`, 
             [full_name, email, phone, passwordHash, role] 
         ); 
  
-        return res.status(201).json({ 
-            success: true, 
-            message: 'Registration successful', 
-            userId: result.insertId 
-        }); 
+        return res.status(201).json({ success: true, message: 'Registration successful', userId: result.insertId }); 
     } catch (error) { 
         console.error('Registration error:', error); 
- 
         if (error.code === 'ER_DUP_ENTRY') { 
-            return res.status(409).json({ 
-                success: false, 
-                message: 'Email or phone number is already registered' 
-            }); 
+            return res.status(409).json({ success: false, message: 'Email or phone number is already registered' }); 
         } 
- 
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        }); 
+        return res.status(500).json({ success: false, message: 'Server error' }); 
     } 
 }); 
  
@@ -272,46 +382,26 @@ app.post('/api/login', async (req, res) => {
         const { emailOrMobile, password } = req.body; 
  
         if (!emailOrMobile || !password) { 
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Email/mobile and password are required' 
-            }); 
+            return res.status(400).json({ success: false, message: 'Email/mobile and password are required' }); 
         } 
  
         const [users] = await pool.query( 
-            `SELECT user_id, full_name, email, phone, password_hash, role, is_active 
-             FROM users 
-             WHERE email = ? OR phone = ? 
-             LIMIT 1`, 
+            `SELECT user_id, full_name, email, phone, password_hash, role, is_active FROM users WHERE email = ? OR phone = ? LIMIT 1`, 
             [emailOrMobile, emailOrMobile] 
         ); 
  
         if (users.length === 0) { 
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Invalid email/mobile or password' 
-            }); 
+            return res.status(401).json({ success: false, message: 'Invalid email/mobile or password' }); 
         } 
  
         const user = users[0]; 
- 
         if (!user.is_active) { 
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Your account is inactive' 
-            }); 
+            return res.status(403).json({ success: false, message: 'Your account is inactive' }); 
         } 
  
-        const passwordMatch = await bcrypt.compare( 
-            password, 
-            user.password_hash 
-        ); 
- 
+        const passwordMatch = await bcrypt.compare(password, user.password_hash); 
         if (!passwordMatch) { 
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Invalid email/mobile or password' 
-            }); 
+            return res.status(401).json({ success: false, message: 'Invalid email/mobile or password' }); 
         } 
  
         return res.json({ 
@@ -328,37 +418,21 @@ app.post('/api/login', async (req, res) => {
         }); 
     } catch (error) { 
         console.error('Login error:', error); 
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Server error' 
-        }); 
+        return res.status(500).json({ success: false, message: 'Server error' }); 
     } 
 }); 
+
 // Bus Search API 
 app.get('/api/buses', async (req, res) => { 
     try { 
         const { from, to, date } = req.query; 
  
         if (!from || !to || !date) { 
-            return res.status(400).json({ 
-                message: 'From, To and Journey Date are required' 
-            }); 
+            return res.status(400).json({ message: 'From, To and Journey Date are required' }); 
         } 
  
         const sql = ` 
-            SELECT 
-                bus_id, 
-                operator_id,
-                bus_name, 
-                bus_number, 
-                bus_type, 
-                from_city, 
-                to_city, 
-                journey_date, 
-                departure_time, 
-                arrival_time, 
-                price, 
-                total_seats 
+            SELECT bus_id, operator_id, bus_name, bus_number, bus_type, from_city, to_city, journey_date, departure_time, arrival_time, price, total_seats 
             FROM buses 
             WHERE LOWER(TRIM(from_city)) = LOWER(TRIM(?)) 
               AND LOWER(TRIM(to_city)) = LOWER(TRIM(?)) 
@@ -369,26 +443,21 @@ app.get('/api/buses', async (req, res) => {
         const [results] = await pool.query(sql, [from, to, date]); 
  
         const mappedResults = await Promise.all(results.map(async (bus) => {
-            // Using the exact same query format as your working booked-seats route
             const [bookings] = await pool.query(
                 `SELECT seats_booked FROM bookings WHERE bus_id = ? AND journey_date = ? AND booking_status = 'CONFIRMED'`,
                 [bus.bus_id, date]
             );
 
-            // Extract and count booked seats using the exact same logic
             const bookedSeats = [];
             bookings.forEach(row => {
                 if (row.seats_booked) {
                     row.seats_booked.split(',').forEach(seat => {
                         const trimmed = seat.trim();
-                        if (trimmed) {
-                            bookedSeats.push(trimmed);
-                        }
+                        if (trimmed) bookedSeats.push(trimmed);
                     });
                 }
             });
 
-            // Use Set to ensure unique seat counts
             const bookedCount = new Set(bookedSeats).size;
             const availableSeats = Math.max(0, bus.total_seats - bookedCount);
 
@@ -403,17 +472,14 @@ app.get('/api/buses', async (req, res) => {
         return res.json(mappedResults); 
     } catch (error) { 
         console.error('Bus search error:', error);
-        return res.status(500).json({ 
-            message: 'Database error' 
-        }); 
+        return res.status(500).json({ message: 'Database error' }); 
     } 
 });
-// SUPPORT STAFF & CONTACT ENDPOINTS
 
+// SUPPORT STAFF & CONTACT ENDPOINTS
 app.post('/api/contact', async (req, res) => {
     try {
         const { full_name, email, phone, subject, message } = req.body;
-
         if (!full_name || !email || !message) {
             return res.status(400).json({ success: false, message: 'Name, email, and message are required' });
         }
@@ -435,9 +501,7 @@ app.get('/api/support/messages', async (req, res) => {
     try {
         const [messages] = await pool.query(
             `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
-             FROM support_messages 
-             WHERE parent_id IS NULL 
-             ORDER BY created_at DESC`
+             FROM support_messages WHERE parent_id IS NULL ORDER BY created_at DESC`
         );
         return res.json(messages);
     } catch (error) {
@@ -451,9 +515,7 @@ app.get('/api/support/messages/:id/thread', async (req, res) => {
         const messageId = req.params.id;
         const [thread] = await pool.query(
             `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
-             FROM support_messages 
-             WHERE message_id = ? OR parent_id = ? 
-             ORDER BY created_at ASC`,
+             FROM support_messages WHERE message_id = ? OR parent_id = ? ORDER BY created_at ASC`,
             [messageId, messageId]
         );
         return res.json(thread);
@@ -467,7 +529,6 @@ app.post('/api/support/messages/:id/reply', async (req, res) => {
     try {
         const messageId = req.params.id;
         const { reply_text, sender_name, sender_type } = req.body;
-
         if (!reply_text) {
             return res.status(400).json({ success: false, message: 'Reply text is required' });
         }
@@ -502,9 +563,7 @@ app.get('/api/user/inquiries', async (req, res) => {
 
         const [inquiries] = await pool.query(
             `SELECT message_id AS id, message_id, parent_id, full_name, email, phone, subject, message, sender_type, status, created_at 
-             FROM support_messages 
-             WHERE email = ? AND parent_id IS NULL 
-             ORDER BY created_at DESC`,
+             FROM support_messages WHERE email = ? AND parent_id IS NULL ORDER BY created_at DESC`,
             [email]
         );
         return res.json(inquiries);
@@ -524,18 +583,6 @@ app.patch('/api/support/messages/:id/resolve', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
-// ==========================================
-// OPERATOR MODULE APIS
-// ==========================================
-
-function verifyOperator(req, res, next) {
-    const userRole = req.headers['x-user-role'];
-    if (userRole === 'OPERATOR' || userRole === 'ADMIN') {
-        return next();
-    }
-    return res.status(403).json({ success: false, message: 'Access denied. Operators only.' });
-}
 
 app.get('/api/operator/reports/summary', verifyOperator, async (req, res) => {
     try {
@@ -596,9 +643,7 @@ app.get('/api/operator/schedules', verifyOperator, async (req, res) => {
         const operatorId = req.headers['x-user-id'];
         const [schedules] = await pool.query(
             `SELECT bus_id AS id, bus_id, bus_name, bus_number, from_city, to_city, journey_date, departure_time, arrival_time, price 
-             FROM buses 
-             WHERE operator_id = ? 
-             ORDER BY journey_date DESC`,
+             FROM buses WHERE operator_id = ? ORDER BY journey_date DESC`,
             [operatorId]
         );
         res.json(schedules);
@@ -630,44 +675,6 @@ app.put('/api/operator/buses/:id', verifyOperator, async (req, res) => {
         res.json({ success: true, message: 'Bus and route updated successfully' });
     } catch (error) {
         console.error('Error updating bus:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
-app.put('/api/operator/buses/:id/fleet', verifyOperator, async (req, res) => {
-    try {
-        const operatorId = req.headers['x-user-id'];
-        const busId = req.params.id;
-        const { bus_name, bus_number, bus_type, total_seats, price } = req.body;
-
-        await pool.query(
-            `UPDATE buses 
-             SET bus_name = ?, bus_number = ?, bus_type = ?, total_seats = ?, price = ? 
-             WHERE bus_id = ? AND operator_id = ?`,
-            [bus_name, bus_number, bus_type, total_seats, price, busId, operatorId]
-        );
-        res.json({ success: true, message: 'Bus fleet details and price updated successfully' });
-    } catch (error) {
-        console.error('Error updating bus fleet:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
-app.put('/api/operator/buses/:id/route', verifyOperator, async (req, res) => {
-    try {
-        const operatorId = req.headers['x-user-id'];
-        const busId = req.params.id;
-        const { from_city, to_city, journey_date, departure_time, arrival_time, price } = req.body;
-
-        await pool.query(
-            `UPDATE buses 
-             SET from_city = ?, to_city = ?, journey_date = ?, departure_time = ?, arrival_time = ?, price = ? 
-             WHERE bus_id = ? AND operator_id = ?`,
-            [from_city, to_city, journey_date, departure_time, arrival_time, price, busId, operatorId]
-        );
-        res.json({ success: true, message: 'Route schedule updated successfully' });
-    } catch (error) {
-        console.error('Error updating route schedule:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -713,20 +720,12 @@ app.patch('/api/user/bookings/:id/cancel', async (req, res) => {
         const bookingId = req.params.id;
         const userId = req.headers['x-user-id'];
 
-        const [existing] = await pool.query(
-            'SELECT booking_id FROM bookings WHERE booking_id = ? AND user_id = ?', 
-            [bookingId, userId]
-        );
-
+        const [existing] = await pool.query('SELECT booking_id FROM bookings WHERE booking_id = ? AND user_id = ?', [bookingId, userId]);
         if (existing.length === 0) {
             return res.status(404).json({ success: false, message: 'Booking not found' });
         }
 
-        await pool.query(
-            `UPDATE bookings SET booking_status = 'CANCELLED' WHERE booking_id = ?`, 
-            [bookingId]
-        );
-
+        await pool.query(`UPDATE bookings SET booking_status = 'CANCELLED' WHERE booking_id = ?`, [bookingId]);
         return res.json({ success: true, message: 'Booking cancelled successfully' });
     } catch (error) {
         console.error('Error cancelling booking:', error);
