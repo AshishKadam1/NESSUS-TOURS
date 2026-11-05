@@ -12,6 +12,7 @@
             --dark: #172f3d;
             --light: #f5f9fa;
             --border: #d8e4e8;
+            --danger: #e63946;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
@@ -109,6 +110,8 @@
 
         th, td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
         th { background: var(--secondary); color: white; }
+        tbody tr { cursor: pointer; transition: background 0.15s; }
+        tbody tr:hover { background: #f1f7f9; }
 
         .btn-primary {
             background: var(--primary);
@@ -119,20 +122,31 @@
             cursor: pointer;
             font-weight: bold;
         }
-
         .btn-primary:hover { background: var(--primary-dark); }
 
         .btn-edit {
             background: #f39c12;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
             font-size: 12px;
         }
         .btn-edit:hover { background: #d68910; }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .btn-delete:hover { background: #c52233; }
 
         /* Modals */
         .modal {
@@ -146,7 +160,7 @@
 
         .modal-content {
             background: white;
-            width: 450px;
+            width: 500px;
             max-height: 90vh;
             overflow-y: auto;
             padding: 25px;
@@ -166,7 +180,6 @@
         <nav>
             <a href="#" class="active" onclick="switchTab('dashboard', this)">📊 Dashboard</a>
             <a href="#" onclick="switchTab('buses', this)">🚌 Bus Management</a>
-            <a href="#" onclick="switchTab('routes', this)">🗺️ Routes & Schedules</a>
         </nav>
         <a href="#" class="logout-btn" onclick="logout()">🚪 Logout</a>
     </div>
@@ -188,43 +201,25 @@
         <!-- 2. Bus Management Tab -->
         <div id="buses" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h1>Bus Fleet Management</h1>
+                <h1>Bus Management</h1>
                 <button class="btn-primary" onclick="openAddBusModal()">+ Add New Bus</button>
             </div>
+            <p style="color: #687980; font-size: 13px; margin-top: 5px;">Click on any bus row to inspect booked seats and passenger details.</p>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Bus Name</th>
-                        <th>Bus Number</th>
-                        <th>Type</th>
-                        <th>Total Seats</th>
+                        <th>Bus Info</th>
+                        <th>Route</th>
+                        <th>Date & Time</th>
+                        <th>Type & Capacity</th>
+                        <th>Available Seats</th>
                         <th>Price</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="busTableBody">
-                    <tr><td colspan="6" style="text-align:center;">Loading fleet...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 3. Schedules Tab -->
-        <div id="routes" class="tab-content">
-            <h1>Active Routes & Schedules</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Bus</th>
-                        <th>Route</th>
-                        <th>Date</th>
-                        <th>Departure / Arrival</th>
-                        <th>Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="scheduleTableBody">
-                    <tr><td colspan="6" style="text-align:center;">Loading schedules...</td></tr>
+                    <tr><td colspan="7" style="text-align:center;">Loading buses...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -233,9 +228,9 @@
 
     <!-- Add Bus Modal -->
     <div id="addBusModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="margin-bottom: 15px;">Add Bus & Route</h2>
-            <form onsubmit="handleAddBus(event)">
+            <form id="addBusForm" onsubmit="handleAddBus(event)">
                 <div class="form-group"><label>Bus Name</label><input type="text" id="busName" required></div>
                 <div class="form-group"><label>Bus Number</label><input type="text" id="busNumber" required></div>
                 <div class="form-group">
@@ -263,10 +258,10 @@
         </div>
     </div>
 
-    <!-- Edit Bus Modal (Fleet & Price) -->
+    <!-- Edit Bus Modal -->
     <div id="editBusModal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 15px;">Edit Fleet Details</h2>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom: 15px;">Edit Bus Details</h2>
             <form onsubmit="handleEditBus(event)">
                 <input type="hidden" id="editBusId">
                 <div class="form-group"><label>Bus Name</label><input type="text" id="editBusName" required></div>
@@ -280,21 +275,6 @@
                     </select>
                 </div>
                 <div class="form-group"><label>Total Seats</label><input type="number" id="editTotalSeats" required></div>
-                <div class="form-group"><label>Price (₹)</label><input type="number" id="editBusPrice" required></div>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-                    <button type="button" onclick="closeEditBusModal()" style="padding:8px 14px; border:none; background:#ccc; border-radius:6px; cursor:pointer;">Cancel</button>
-                    <button type="submit" class="btn-primary">Save Fleet Info</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Route Modal (Schedules Only) -->
-    <div id="editRouteModal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 15px;">Edit Route & Schedule</h2>
-            <form onsubmit="handleEditRoute(event)">
-                <input type="hidden" id="editRouteBusId">
                 <div class="form-group"><label>From City</label><input type="text" id="editFromCity" required></div>
                 <div class="form-group"><label>To City</label><input type="text" id="editToCity" required></div>
                 <div class="form-group"><label>Journey Date</label><input type="date" id="editJourneyDate" required></div>
@@ -302,12 +282,25 @@
                     <div class="form-group" style="flex:1;"><label>Departure Time</label><input type="time" id="editDepartureTime" required></div>
                     <div class="form-group" style="flex:1;"><label>Arrival Time</label><input type="time" id="editArrivalTime" required></div>
                 </div>
-                <div class="form-group"><label>Price (₹)</label><input type="number" id="editPrice" required></div>
+                <div class="form-group"><label>Price (₹)</label><input type="number" id="editBusPrice" required></div>
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-                    <button type="button" onclick="closeEditRouteModal()" style="padding:8px 14px; border:none; background:#ccc; border-radius:6px; cursor:pointer;">Cancel</button>
-                    <button type="submit" class="btn-primary">Save Schedule</button>
+                    <button type="button" onclick="closeEditBusModal()" style="padding:8px 14px; border:none; background:#ccc; border-radius:6px; cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Passenger Details Modal -->
+    <div id="passengerModal" class="modal">
+        <div class="modal-content" style="width: 600px;" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h2 id="modalBusTitle">Passenger Manifest</h2>
+                <button onclick="closePassengerModal()" style="background:none; border:none; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+            <div id="passengerModalBody" style="max-height: 400px; overflow-y: auto;">
+                <p>Loading passengers...</p>
+            </div>
         </div>
     </div>
 
@@ -335,7 +328,10 @@
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
 
-            if (tabId === 'buses' || tabId === 'routes') loadBuses();
+            if (tabId === 'buses') {
+                loadSummary();
+                loadBuses();
+            }
         }
 
         async function loadSummary() {
@@ -355,12 +351,19 @@
             try {
                 const res = await fetch('/api/operator/buses', { headers: getAuthHeaders() });
                 currentBuses = await res.json();
-                
                 renderBusTable();
-                renderScheduleTable();
             } catch (err) {
                 console.error('Error loading buses:', err);
             }
+        }
+
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const [hours, minutes] = timeStr.split(':');
+            let h = parseInt(hours, 10);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${h}:${minutes} ${ampm}`;
         }
 
         function renderBusTable() {
@@ -368,50 +371,73 @@
             tbody.innerHTML = '';
 
             if (currentBuses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No buses registered yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No buses registered yet.</td></tr>`;
                 return;
             }
 
-            currentBuses.forEach(b => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${b.bus_name}</b></td>
-                        <td>${b.bus_number}</td>
-                        <td>${b.bus_type}</td>
-                        <td>${b.total_seats}</td>
-                        <td>₹${b.price}</td>
-                        <td><button class="btn-edit" onclick="openEditBusModal(${b.id})">✏️ Edit Bus</button></td>
-                    </tr>
+            currentBuses.forEach(async b => {
+                // Timezone-safe date rendering
+                let dateStr = '';
+                if (b.journey_date) {
+                    const cleanDate = String(b.journey_date).split('T')[0];
+                    const [year, month, day] = cleanDate.split('-');
+                    if (year && month && day) {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        dateStr = `${parseInt(day, 10)} ${months[parseInt(month, 10) - 1]} ${year}`;
+                    } else {
+                        dateStr = cleanDate;
+                    }
+                }
+
+                const depTime = formatTime(b.departure_time);
+                const arrTime = formatTime(b.arrival_time);
+                const timeStr = (depTime && arrTime) ? `${depTime} ➔ ${arrTime}` : (depTime || arrTime || 'N/A');
+                
+                // Fetch available seats count dynamically per bus
+                let availableSeats = b.total_seats;
+                try {
+                    const seatRes = await fetch(`/api/buses/${b.id}/booked-seats?date=${b.journey_date ? b.journey_date.split('T')[0] : ''}`);
+                    const seatData = await seatRes.json();
+                    if (seatData.success && seatData.seatGenderMap) {
+                        const bookedCount = Object.keys(seatData.seatGenderMap).length;
+                        availableSeats = Math.max(0, b.total_seats - bookedCount);
+                    }
+                } catch (e) {
+                    console.error("Error fetching seat map info", e);
+                }
+
+                const row = document.createElement('tr');
+                row.onclick = (e) => {
+                    // Prevent row click if clicking action buttons
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    openPassengerModal(b.id, b.bus_name, b.bus_number);
+                };
+
+                row.innerHTML = `
+                    <td><b>${b.bus_name}</b><br><small>${b.bus_number}</small></td>
+                    <td>${b.from_city} ➔ ${b.to_city}</td>
+                    <td><b>${dateStr}</b><br><small style="color:#087e8b;">🕒 ${timeStr}</small></td>
+                    <td>${b.bus_type} (${b.total_seats} seats)</td>
+                    <td><b style="color: ${availableSeats > 0 ? 'green' : 'red'};">${availableSeats} / ${b.total_seats}</b></td>
+                    <td>₹${b.price}</td>
+                    <td>
+                        <button class="btn-edit" onclick="openEditBusModal(${b.id})">✏️</button>
+                        <button class="btn-delete" onclick="deleteBus(${b.id})">🗑️</button>
+                    </td>
                 `;
+                tbody.appendChild(row);
             });
         }
 
-        function renderScheduleTable() {
-            const tbody = document.getElementById('scheduleTableBody');
-            tbody.innerHTML = '';
-
-            if (currentBuses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No active schedules.</td></tr>`;
-                return;
-            }
-
-            currentBuses.forEach(s => {
-                const dateStr = s.journey_date ? new Date(s.journey_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${s.bus_name}</b><br><small>${s.bus_number}</small></td>
-                        <td>${s.from_city} ➔ ${s.to_city}</td>
-                        <td>${dateStr}</td>
-                        <td>${s.departure_time} - ${s.arrival_time}</td>
-                        <td>₹${s.price}</td>
-                        <td><button class="btn-edit" onclick="openEditRouteModal(${s.id})">✏️ Edit Route</button></td>
-                    </tr>
-                `;
-            });
+        function openAddBusModal() { 
+            document.getElementById('addBusForm').reset();
+            document.getElementById('addBusModal').style.display = 'flex'; 
         }
 
-        function openAddBusModal() { document.getElementById('addBusModal').style.display = 'flex'; }
-        function closeAddBusModal() { document.getElementById('addBusModal').style.display = 'none'; }
+        function closeAddBusModal() { 
+            document.getElementById('addBusForm').reset();
+            document.getElementById('addBusModal').style.display = 'none'; 
+        }
 
         async function handleAddBus(event) {
             event.preventDefault();
@@ -422,7 +448,7 @@
                 total_seats: document.getElementById('totalSeats').value,
                 from_city: document.getElementById('fromCity').value,
                 to_city: document.getElementById('toCity').value,
-                journey_date: document.getElementById('journeyDate').value,
+                journey_date: document.getElementById('journeyDate').value.substring(0, 10),
                 departure_time: document.getElementById('departureTime').value,
                 arrival_time: document.getElementById('arrivalTime').value,
                 price: document.getElementById('price').value
@@ -448,7 +474,6 @@
             }
         }
 
-        /* Bus Fleet Editing Functions */
         function openEditBusModal(id) {
             const bus = currentBuses.find(b => b.id === id);
             if (!bus) return;
@@ -458,6 +483,13 @@
             document.getElementById('editBusNumber').value = bus.bus_number;
             document.getElementById('editBusType').value = bus.bus_type;
             document.getElementById('editTotalSeats').value = bus.total_seats;
+            document.getElementById('editFromCity').value = bus.from_city;
+            document.getElementById('editToCity').value = bus.to_city;
+            if (bus.journey_date) {
+                document.getElementById('editJourneyDate').value = bus.journey_date.split('T')[0];
+            }
+            document.getElementById('editDepartureTime').value = bus.departure_time;
+            document.getElementById('editArrivalTime').value = bus.arrival_time;
             document.getElementById('editBusPrice').value = bus.price;
 
             document.getElementById('editBusModal').style.display = 'flex';
@@ -468,25 +500,31 @@
         async function handleEditBus(event) {
             event.preventDefault();
             const id = document.getElementById('editBusId').value;
-            const fleetData = {
+            const busData = {
                 bus_name: document.getElementById('editBusName').value,
                 bus_number: document.getElementById('editBusNumber').value,
                 bus_type: document.getElementById('editBusType').value,
                 total_seats: document.getElementById('editTotalSeats').value,
+                from_city: document.getElementById('editFromCity').value,
+                to_city: document.getElementById('editToCity').value,
+                journey_date: document.getElementById('editJourneyDate').value.substring(0, 10),
+                departure_time: document.getElementById('editDepartureTime').value,
+                arrival_time: document.getElementById('editArrivalTime').value,
                 price: document.getElementById('editBusPrice').value
             };
 
             try {
-                const res = await fetch(`/api/operator/buses/${id}/fleet`, {
+                const res = await fetch(`/api/operator/buses/${id}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify(fleetData)
+                    body: JSON.stringify(busData)
                 });
 
                 if (res.ok) {
                     alert('Bus details updated successfully!');
                     closeEditBusModal();
                     loadBuses();
+                    loadSummary();
                 } else {
                     alert('Failed to update bus.');
                 }
@@ -495,55 +533,62 @@
             }
         }
 
-        /* Route & Schedule Editing Functions */
-        function openEditRouteModal(id) {
-            const bus = currentBuses.find(b => b.id === id);
-            if (!bus) return;
-
-            document.getElementById('editRouteBusId').value = bus.id;
-            document.getElementById('editFromCity').value = bus.from_city;
-            document.getElementById('editToCity').value = bus.to_city;
-            if (bus.journey_date) {
-                document.getElementById('editJourneyDate').value = bus.journey_date.split('T')[0];
-            }
-            document.getElementById('editDepartureTime').value = bus.departure_time;
-            document.getElementById('editArrivalTime').value = bus.arrival_time;
-            document.getElementById('editPrice').value = bus.price;
-
-            document.getElementById('editRouteModal').style.display = 'flex';
-        }
-
-        function closeEditRouteModal() { document.getElementById('editRouteModal').style.display = 'none'; }
-
-        async function handleEditRoute(event) {
-            event.preventDefault();
-            const id = document.getElementById('editRouteBusId').value;
-            const routeData = {
-                from_city: document.getElementById('editFromCity').value,
-                to_city: document.getElementById('editToCity').value,
-                journey_date: document.getElementById('editJourneyDate').value,
-                departure_time: document.getElementById('editDepartureTime').value,
-                arrival_time: document.getElementById('editArrivalTime').value,
-                price: document.getElementById('editPrice').value
-            };
+        async function deleteBus(id) {
+            if (!confirm('Are you sure you want to delete this bus and its associated bookings?')) return;
 
             try {
-                const res = await fetch(`/api/operator/buses/${id}/route`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(routeData)
+                const res = await fetch(`/api/operator/buses/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
                 });
 
                 if (res.ok) {
-                    alert('Route schedule updated successfully!');
-                    closeEditRouteModal();
+                    alert('Bus deleted successfully!');
                     loadBuses();
+                    loadSummary();
                 } else {
-                    alert('Failed to update route.');
+                    alert('Failed to delete bus.');
                 }
             } catch (err) {
-                console.error('Error updating route:', err);
+                console.error('Error deleting bus:', err);
             }
+        }
+
+        async function openPassengerModal(busId, busName, busNumber) {
+            document.getElementById('modalBusTitle').textContent = `Manifest: ${busName} (${busNumber})`;
+            document.getElementById('passengerModalBody').innerHTML = '<p>Loading passenger manifest...</p>';
+            document.getElementById('passengerModal').style.display = 'flex';
+
+            try {
+                const res = await fetch(`/api/operator/buses/${busId}/passengers`, { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                if (data.success && data.bookings.length > 0) {
+                    let html = '<table style="margin-top:0;"><thead><tr><th>Ref</th><th>Seats</th><th>Genders</th><th>Contact</th><th>Paid</th></tr></thead><tbody>';
+                    data.bookings.forEach(b => {
+                        html += `
+                            <tr>
+                                <td><b>${b.booking_reference}</b></td>
+                                <td>${b.seats_booked}</td>
+                                <td>${b.passenger_genders || 'N/A'}</td>
+                                <td>${b.primary_name || 'Guest'}<br><small>${b.primary_phone || ''}</small></td>
+                                <td>₹${b.total_amount}</td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                    document.getElementById('passengerModalBody').innerHTML = html;
+                } else {
+                    document.getElementById('passengerModalBody').innerHTML = '<p style="text-align:center; padding: 20px; color: #687980;">No passenger bookings found for this bus yet.</p>';
+                }
+            } catch (err) {
+                console.error('Error loading passengers:', err);
+                document.getElementById('passengerModalBody').innerHTML = '<p style="color:red; text-align:center;">Failed to load passenger list.</p>';
+            }
+        }
+
+        function closePassengerModal() {
+            document.getElementById('passengerModal').style.display = 'none';
         }
 
         function logout() {
