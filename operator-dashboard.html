@@ -232,12 +232,14 @@
             <h2 style="margin-bottom: 15px;">Add Bus & Route</h2>
             <form id="addBusForm" onsubmit="handleAddBus(event)">
                 <div class="form-group"><label>Bus Name</label><input type="text" id="busName" required></div>
-                <div class="form-group"><label>Bus Number</label><input type="text" id="busNumber" required></div>
+                <!-- REMOVED REQUIRED ATTRIBUTE BELOW -->
+                <div class="form-group"><label>Bus Number (Optional)</label><input type="text" id="busNumber"></div>
                 <div class="form-group">
                     <label>Bus Type</label>
                     <select id="busType">
                         <option value="AC Sleeper">AC Sleeper</option>
                         <option value="AC Seater">AC Seater</option>
+                        <option value="Non-AC Sleeper">Non-AC Sleeper</option>
                         <option value="Non-AC Seater">Non-AC Seater</option>
                     </select>
                 </div>
@@ -265,12 +267,14 @@
             <form onsubmit="handleEditBus(event)">
                 <input type="hidden" id="editBusId">
                 <div class="form-group"><label>Bus Name</label><input type="text" id="editBusName" required></div>
-                <div class="form-group"><label>Bus Number</label><input type="text" id="editBusNumber" required></div>
+                <!-- REMOVED REQUIRED ATTRIBUTE BELOW -->
+                <div class="form-group"><label>Bus Number (Optional)</label><input type="text" id="editBusNumber"></div>
                 <div class="form-group">
                     <label>Bus Type</label>
                     <select id="editBusType">
                         <option value="AC Sleeper">AC Sleeper</option>
                         <option value="AC Seater">AC Seater</option>
+                        <option value="Non-AC Sleeper">Non-AC Sleeper</option>
                         <option value="Non-AC Seater">Non-AC Seater</option>
                     </select>
                 </div>
@@ -376,7 +380,6 @@
             }
 
             currentBuses.forEach(async b => {
-                // Timezone-safe date rendering
                 let dateStr = '';
                 if (b.journey_date) {
                     const cleanDate = String(b.journey_date).split('T')[0];
@@ -393,7 +396,6 @@
                 const arrTime = formatTime(b.arrival_time);
                 const timeStr = (depTime && arrTime) ? `${depTime} ➔ ${arrTime}` : (depTime || arrTime || 'N/A');
                 
-                // Fetch available seats count dynamically per bus
                 let availableSeats = b.total_seats;
                 try {
                     const seatRes = await fetch(`/api/buses/${b.id}/booked-seats?date=${b.journey_date ? b.journey_date.split('T')[0] : ''}`);
@@ -408,13 +410,15 @@
 
                 const row = document.createElement('tr');
                 row.onclick = (e) => {
-                    // Prevent row click if clicking action buttons
                     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                     openPassengerModal(b.id, b.bus_name, b.bus_number);
                 };
 
+                // Handles optional bus number subtext smoothly
+                const busSubtext = b.bus_number ? `<br><small>${b.bus_number}</small>` : '';
+
                 row.innerHTML = `
-                    <td><b>${b.bus_name}</b><br><small>${b.bus_number}</small></td>
+                    <td><b>${b.bus_name}</b>${busSubtext}</td>
                     <td>${b.from_city} ➔ ${b.to_city}</td>
                     <td><b>${dateStr}</b><br><small style="color:#087e8b;">🕒 ${timeStr}</small></td>
                     <td>${b.bus_type} (${b.total_seats} seats)</td>
@@ -443,7 +447,7 @@
             event.preventDefault();
             const busData = {
                 bus_name: document.getElementById('busName').value,
-                bus_number: document.getElementById('busNumber').value,
+                bus_number: document.getElementById('busNumber').value || '',
                 bus_type: document.getElementById('busType').value,
                 total_seats: document.getElementById('totalSeats').value,
                 from_city: document.getElementById('fromCity').value,
@@ -480,7 +484,7 @@
 
             document.getElementById('editBusId').value = bus.id;
             document.getElementById('editBusName').value = bus.bus_name;
-            document.getElementById('editBusNumber').value = bus.bus_number;
+            document.getElementById('editBusNumber').value = bus.bus_number || '';
             document.getElementById('editBusType').value = bus.bus_type;
             document.getElementById('editTotalSeats').value = bus.total_seats;
             document.getElementById('editFromCity').value = bus.from_city;
@@ -502,7 +506,7 @@
             const id = document.getElementById('editBusId').value;
             const busData = {
                 bus_name: document.getElementById('editBusName').value,
-                bus_number: document.getElementById('editBusNumber').value,
+                bus_number: document.getElementById('editBusNumber').value || '',
                 bus_type: document.getElementById('editBusType').value,
                 total_seats: document.getElementById('editTotalSeats').value,
                 from_city: document.getElementById('editFromCity').value,
@@ -555,7 +559,8 @@
         }
 
         async function openPassengerModal(busId, busName, busNumber) {
-            document.getElementById('modalBusTitle').textContent = `Manifest: ${busName} (${busNumber})`;
+            const subtitle = busNumber ? ` (${busNumber})` : '';
+            document.getElementById('modalBusTitle').textContent = `Manifest: ${busName}${subtitle}`;
             document.getElementById('passengerModalBody').innerHTML = '<p>Loading passenger manifest...</p>';
             document.getElementById('passengerModal').style.display = 'flex';
 
